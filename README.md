@@ -134,17 +134,58 @@ pnpm build
 - 上传 `out/` 目录为 Pages artifact
 - 发布到 GitHub Pages
 
+## 自定义域名
+
+当前仓库已经预置了 [CNAME](./public/CNAME)：
+
+```text
+www.255654.xyz
+```
+
+这意味着：
+
+- 构建时如果检测到 `public/CNAME` 存在，会自动关闭仓库子路径 `basePath`
+- 自定义域名场景会直接从站点根路径 `/` 提供资源
+- 如果未来改回纯仓库域名部署，只要移除 `public/CNAME`，构建会恢复自动 `/<repo>` 路径
+
+### `www.255654.xyz` 的 DNS
+
+- `CNAME`
+- 主机记录：`www`
+- 目标值：`sikuai2333.github.io`
+
+### 如果还要支持裸域 `255654.xyz`
+
+为 `@` 添加：
+
+- `A` -> `185.199.108.153`
+- `A` -> `185.199.109.153`
+- `A` -> `185.199.110.153`
+- `A` -> `185.199.111.153`
+- `AAAA` -> `2606:50c0:8000::153`
+- `AAAA` -> `2606:50c0:8001::153`
+- `AAAA` -> `2606:50c0:8002::153`
+- `AAAA` -> `2606:50c0:8003::153`
+
+### GitHub Pages 设置
+
+1. 打开仓库 `Settings -> Pages`
+2. `Custom domain` 设为 `www.255654.xyz`
+3. 等 DNS 生效后，勾上 `Enforce HTTPS`
+
 ## 仓库路径和 `basePath` 说明
 
 项目已经在 [next.config.ts](./next.config.ts) 中处理了两种 GitHub Pages 地址：
 
 - 用户主页站点：`https://<user>.github.io/`
 - 仓库站点：`https://<user>.github.io/<repo>/`
+- 自定义域名站点：`https://www.255654.xyz/`
 
 当前策略：
 
 - GitHub Actions 环境下会自动读取 `GITHUB_REPOSITORY`
-- 如果仓库名不是 `<user>.github.io`，则自动设置 `basePath` 为 `/<repo>`
+- 如果存在 `public/CNAME`，则优先按自定义域名根路径构建，不使用 `basePath`
+- 如果仓库名不是 `<user>.github.io` 且没有自定义域名，则自动设置 `basePath` 为 `/<repo>`
 - 本地如果要预览仓库子路径效果，可以手动设置 `NEXT_PUBLIC_BASE_PATH`
 
 PowerShell 示例：
