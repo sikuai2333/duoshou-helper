@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { formatCurrency } from "@/lib/currency";
 import type { DashboardSnapshot } from "@/types/domain";
 
@@ -13,33 +14,37 @@ export function BudgetSummaryCard({ snapshot }: BudgetSummaryCardProps) {
   );
 
   return (
-    <Card className="soft-mask overflow-hidden bg-[linear-gradient(135deg,rgba(255,140,107,0.18),rgba(255,255,255,0.78))]">
-      <CardHeader className="pb-4">
-        <span className="inline-flex w-fit rounded-full bg-primary/14 px-3 py-1 text-xs font-medium text-primary-strong">
-          本月预算总览
-        </span>
-        <CardTitle className="text-xl">剩余额度是这次消费前的第一道门</CardTitle>
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">预算总览</p>
+          <InfoTip text="先看剩余额度，再决定这笔钱要不要花。" label="查看预算说明" />
+        </div>
+        <CardTitle>剩余额度</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-1">
           <p className="text-sm text-text-muted">本月还能花</p>
-          <p className="font-display text-4xl font-semibold tracking-tight">
+          <p className="text-4xl font-semibold tracking-tight tabular-nums">
             {formatCurrency(snapshot.remainingBudget)}
           </p>
         </div>
         <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="rounded-[1.3rem] bg-white/80 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">月预算</p>
-            <p className="mt-1 font-semibold">{formatCurrency(snapshot.budget)}</p>
+            <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.budget)}</p>
           </div>
-          <div className="rounded-[1.3rem] bg-white/80 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">已花</p>
-            <p className="mt-1 font-semibold">{formatCurrency(snapshot.monthSpent)}</p>
+            <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.monthSpent)}</p>
           </div>
-          <div className="rounded-[1.3rem] bg-white/80 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">进度</p>
-            <p className="mt-1 font-semibold">{spentRatio}%</p>
+            <p className="mt-1 font-semibold tabular-nums">{spentRatio}%</p>
           </div>
+        </div>
+        <div className="h-2 overflow-hidden rounded-sm bg-surface-strong">
+          <div className="h-full bg-primary" style={{ width: `${spentRatio}%` }} />
         </div>
       </CardContent>
     </Card>

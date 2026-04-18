@@ -34,7 +34,7 @@ export function Sheet({
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild>
               <motion.div
-                className="fixed inset-0 z-50 bg-[rgba(44,33,29,0.36)] backdrop-blur-sm"
+                className="fixed inset-0 z-50 bg-[rgba(32,29,27,0.48)]"
                 initial={motionConfig.overlay.initial}
                 animate={motionConfig.overlay.animate}
                 exit={motionConfig.overlay.exit}
@@ -44,7 +44,7 @@ export function Sheet({
             <Dialog.Content asChild onOpenAutoFocus={(event) => event.preventDefault()}>
               <motion.div
                 className={cn(
-                  "fixed inset-x-0 bottom-0 z-50 rounded-t-[2rem] border border-border-soft bg-surface-strong px-5 pb-8 pt-3 shadow-[0_-18px_60px_rgba(84,58,44,0.18)]",
+                  "fixed inset-x-0 bottom-0 z-50 rounded-t-xl border border-border-soft bg-surface px-5 pb-6 pt-3 shadow-[0_-8px_20px_rgba(32,29,27,0.12)]",
                   className,
                 )}
                 initial={motionConfig.panel.initial}
@@ -52,10 +52,10 @@ export function Sheet({
                 exit={motionConfig.panel.exit}
                 transition={motionConfig.panel.transition}
               >
-                <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-[rgba(122,102,93,0.2)]" />
+                <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-border-soft" />
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <Dialog.Title className="font-display text-xl font-semibold">
+                    <Dialog.Title className="text-lg font-semibold">
                       {title}
                     </Dialog.Title>
                     {description ? (
@@ -64,7 +64,7 @@ export function Sheet({
                       </Dialog.Description>
                     ) : null}
                   </div>
-                  <Dialog.Close className="flex size-9 items-center justify-center rounded-full bg-white/80 text-text-muted transition hover:text-foreground">
+                  <Dialog.Close className="flex size-8 items-center justify-center rounded-md border border-border-soft bg-surface-strong text-text-muted transition-colors hover:text-foreground">
                     <X className="size-4" />
                     <span className="sr-only">关闭</span>
                   </Dialog.Close>

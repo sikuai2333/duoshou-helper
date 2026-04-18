@@ -14,22 +14,20 @@ export function MonthProgressCard({ snapshot }: MonthProgressCardProps) {
         : "bg-accent";
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <span className="inline-flex w-fit rounded-full bg-secondary/16 px-3 py-1 text-xs font-medium text-foreground/80">
-          ⏳ 月度倒计时
-        </span>
-        <CardTitle className="text-xl">这个月还剩 {snapshot.daysLeftInMonth} 天</CardTitle>
+    <Card>
+      <CardHeader className="pb-2">
+        <p className="app-eyebrow">⏳ 月度倒计时</p>
+        <CardTitle>这个月还剩 {snapshot.daysLeftInMonth} 天</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-hidden rounded-full bg-white/75 p-1">
+      <CardContent className="space-y-3">
+        <div className="h-2 overflow-hidden rounded-sm bg-surface-strong">
           <div
-            className={`h-3 rounded-full ${progressTone}`}
+            className={`h-full ${progressTone}`}
             style={{ width: `${snapshot.monthProgressPercent}%` }}
           />
         </div>
         <div className="flex items-center justify-between text-sm text-text-muted">
-          <span>已走过 {snapshot.elapsedDays} 天</span>
+          <span>已过 {snapshot.elapsedDays} 天</span>
           <span>共 {snapshot.totalDaysInMonth} 天</span>
         </div>
       </CardContent>

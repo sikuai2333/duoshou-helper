@@ -15,12 +15,13 @@ import { MonthProgressCard } from "@/components/home/month-progress-card";
 import { QuickActions } from "@/components/home/quick-actions";
 import { RecentEntriesCard } from "@/components/home/recent-entries-card";
 import { Card } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 
 function LoadingCards() {
   return (
     <div className="space-y-4">
       {[0, 1, 2].map((index) => (
-        <Card key={index} className="h-36 animate-pulse rounded-[1.75rem] bg-white/70" />
+        <Card key={index} className="h-32 animate-pulse bg-surface-strong" />
       ))}
     </div>
   );
@@ -35,27 +36,32 @@ export function HomeDashboard() {
   return (
     <>
       <AppShell>
-        <section className="surface-card soft-mask rounded-[2rem] p-5">
+        <section className="surface-card rounded-xl p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
-              <span className="inline-flex rounded-full bg-primary/12 px-3 py-1 text-xs font-semibold text-primary-strong">
-                剁手辅助 · 本地优先
-              </span>
-              <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-tight text-balance">
-                {snapshot?.totalEntries
-                  ? "先看还能花多少，再决定今天要不要动手。"
-                  : "先记下第一笔，消费节奏才会慢慢变清楚。"}
+              <div className="flex items-center gap-1">
+                <p className="app-eyebrow">剁手辅助</p>
+                <InfoTip
+                  text={
+                    snapshot?.totalEntries
+                      ? "首页只保留预算、分类、奶茶和决策四组高频信息，打开就能知道今天该不该花。"
+                      : "当前还是空白月度，不会自动塞进演示数据。先记一笔，首页的统计和建议才会开始工作。"
+                  }
+                  label="查看首页说明"
+                />
+              </div>
+              <h1 className="text-[1.85rem] font-semibold leading-[1.15] tracking-tight text-balance">
+                {snapshot?.totalEntries ? "本月概览" : "开始记账"}
               </h1>
-              <p className="max-w-sm text-sm leading-6 text-text-muted">
-                {snapshot?.totalEntries
-                  ? "首页先给你预算和情绪反馈，真正高频的动作只需要一只手就能完成。"
-                  : "现在还是空白月度，首页会先给你默认预算和清晰入口，不会用 demo 数据替你“伪装已使用”。"}
-              </p>
             </div>
-            <div className="rounded-[1.45rem] bg-white/78 px-3 py-2 text-right shadow-sm">
-              <p className="text-[11px] text-text-muted">当前月份</p>
-              <p className="font-display text-base font-semibold">
+            <div className="min-w-24 border-l border-border-soft pl-4 text-right">
+              <p className="text-xs text-text-muted">当前月份</p>
+              <p className="mt-1 text-base font-semibold tabular-nums">
                 {getMonthLabel(getMonthDate(currentMonthKey))}
+              </p>
+              <p className="mt-3 text-xs text-text-muted">本月记录</p>
+              <p className="mt-1 text-sm font-medium tabular-nums">
+                {snapshot?.totalEntries ?? 0} 笔
               </p>
             </div>
           </div>
@@ -63,7 +69,7 @@ export function HomeDashboard() {
             {lastEntrySavedAt ? (
               <motion.div
                 key={lastEntrySavedAt}
-                className="mt-4 rounded-[1.2rem] bg-white/78 px-4 py-3 text-sm text-text-muted"
+                className="app-feedback mt-4 text-sm text-text-muted"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
                 transition={{ duration: 4, times: [0, 0.12, 0.82, 1] }}

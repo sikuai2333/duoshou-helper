@@ -23,15 +23,8 @@ import type {
   SettingsSnapshot,
 } from "@/types/domain";
 
-async function ensureSettings(): Promise<AppSettings> {
-  const existing = await db.appSettings.get(APP_SETTINGS_ID);
-
-  if (existing) {
-    return existing;
-  }
-
-  const now = new Date().toISOString();
-  const settings: AppSettings = {
+function createDefaultSettings(): AppSettings {
+  return {
     id: APP_SETTINGS_ID,
     defaultBudgetMode: "fixed",
     fixedBudgetValue: DEFAULT_BUDGET,
@@ -39,8 +32,18 @@ async function ensureSettings(): Promise<AppSettings> {
     onboardingDone: false,
     themeMode: "light",
     motionLevel: "full",
-    updatedAt: now,
+    updatedAt: new Date().toISOString(),
   };
+}
+
+async function ensureSettings(): Promise<AppSettings> {
+  const existing = await db.appSettings.get(APP_SETTINGS_ID);
+
+  if (existing) {
+    return existing;
+  }
+
+  const settings = createDefaultSettings();
 
   await db.appSettings.add(settings);
 
@@ -159,26 +162,28 @@ export const appRepository = {
   },
 
   async getSettings() {
-    await this.initializeApp();
-    return ensureSettings();
+    return (await db.appSettings.get(APP_SETTINGS_ID)) ?? createDefaultSettings();
   },
 
   async getDashboardSnapshot(monthKey = getCurrentMonthKey()): Promise<DashboardSnapshot> {
-    await this.initializeApp(monthKey);
-
-    const [budgetRecord, quotaRecord, entries] = await Promise.all([
+    const [settings, budgetRecord, quotaRecord, entries] = await Promise.all([
+      this.getSettings(),
       db.monthlyBudgets.where("monthKey").equals(monthKey).first(),
       db.milkTeaQuotas.where("monthKey").equals(monthKey).first(),
       db.ledgerEntries.where("monthKey").equals(monthKey).toArray(),
     ]);
 
-    const budget = budgetRecord?.budget ?? DEFAULT_BUDGET;
+    const budget =
+      budgetRecord?.budget ??
+      (settings.defaultBudgetMode === "fixed"
+        ? (settings.fixedBudgetValue ?? DEFAULT_BUDGET)
+        : 0);
     const milkTeaQuota =
       quotaRecord ??
       ({
         id: `milk-tea-${monthKey}`,
         monthKey,
-        totalCups: DEFAULT_MILK_TEA_CUPS,
+        totalCups: settings.defaultMilkTeaCups,
         usedCups: 0,
         bonusCups: 0,
         updatedAt: new Date().toISOString(),
@@ -220,11 +225,9 @@ export const appRepository = {
   },
 
   async getSettingsSnapshot(monthKey = getCurrentMonthKey()): Promise<SettingsSnapshot> {
-    await this.initializeApp(monthKey);
-
     const [settings, currentBudget, currentQuota, totalEntries, totalRewards, trackedMonths] =
       await Promise.all([
-        ensureSettings(),
+        this.getSettings(),
         db.monthlyBudgets.where("monthKey").equals(monthKey).first(),
         db.milkTeaQuotas.where("monthKey").equals(monthKey).first(),
         db.ledgerEntries.count(),

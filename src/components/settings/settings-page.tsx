@@ -10,6 +10,7 @@ import type { BudgetMode, MotionLevel, ThemeMode } from "@/types/domain";
 import { AppShell } from "@/components/common/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -197,25 +198,24 @@ export function SettingsPageView() {
 
   return (
     <AppShell>
-      <section className="surface-card rounded-[2rem] p-5">
-        <span className="inline-flex rounded-full bg-accent/18 px-3 py-1 text-xs font-semibold text-foreground">
-          设置页
-        </span>
-        <h1 className="mt-3 font-display text-[2rem] font-semibold tracking-tight">
-          所有规则都在本地生效，不需要登录，也不会上传云端。
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-text-muted">
-          这里先把预算、奶茶额度、数据备份和动效等级都做成能直接使用的版本。
-        </p>
+      <section className="surface-card rounded-xl p-4">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">设置</p>
+          <InfoTip
+            text="这里负责预算模式、奶茶额度、主题动效和数据导入导出，所有修改都只在本地生效。"
+            label="查看设置页说明"
+          />
+        </div>
+        <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight">设置</h1>
       </section>
 
       {feedback ? (
         <div
           className={cn(
-            "rounded-[1.35rem] px-4 py-3 text-sm",
+            "app-feedback text-sm",
             feedback.tone === "success"
-              ? "bg-essential/12 text-essential"
-              : "bg-danger/12 text-danger",
+              ? "border-essential text-essential"
+              : "border-danger text-danger",
           )}
         >
           {feedback.text}
@@ -224,27 +224,33 @@ export function SettingsPageView() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">当前本地状态</CardTitle>
+          <CardTitle>当前本地状态</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-3 text-sm">
-          <div className="rounded-[1.2rem] bg-white/75 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">记录数</p>
-            <p className="mt-1 font-semibold">{isLoading ? "--" : snapshot?.totalEntries}</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {isLoading ? "--" : snapshot?.totalEntries}
+            </p>
           </div>
-          <div className="rounded-[1.2rem] bg-white/75 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">奖励记录</p>
-            <p className="mt-1 font-semibold">{isLoading ? "--" : snapshot?.totalRewards}</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {isLoading ? "--" : snapshot?.totalRewards}
+            </p>
           </div>
-          <div className="rounded-[1.2rem] bg-white/75 p-3">
+          <div className="app-stat">
             <p className="text-text-muted">已追踪月份</p>
-            <p className="mt-1 font-semibold">{isLoading ? "--" : snapshot?.trackedMonths}</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {isLoading ? "--" : snapshot?.trackedMonths}
+            </p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">月预算设置</CardTitle>
+          <CardTitle>月预算设置</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -254,10 +260,10 @@ export function SettingsPageView() {
                 type="button"
                 onClick={() => setModeDraft(mode)}
                 className={cn(
-                  "rounded-[1.2rem] border px-4 py-3 text-left transition",
+                  "rounded-md border px-4 py-3 text-left transition-colors",
                   selectedMode === mode
-                    ? "border-transparent bg-white shadow-[0_10px_24px_rgba(83,61,47,0.1)]"
-                    : "border-border-soft bg-white/60 text-text-muted",
+                    ? "border-foreground bg-surface-strong"
+                    : "border-border-soft bg-surface text-text-muted",
                 )}
               >
                 <p className="text-sm font-semibold">
@@ -281,7 +287,7 @@ export function SettingsPageView() {
               <Input
                 id="budget-input"
                 inputMode="decimal"
-                className="h-14 pl-9 text-lg font-semibold"
+                className="h-12 pl-9 text-lg font-semibold tabular-nums"
                 value={budgetValue}
                 onChange={(event) => setBudgetDraft(event.target.value)}
               />
@@ -300,21 +306,27 @@ export function SettingsPageView() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">奶茶额度与奖励</CardTitle>
+          <CardTitle>奶茶额度与奖励</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-3 text-sm">
-            <div className="rounded-[1.2rem] bg-white/75 p-3">
+            <div className="app-stat">
               <p className="text-text-muted">默认杯数</p>
-              <p className="mt-1 font-semibold">{snapshot?.settings.defaultMilkTeaCups ?? "--"}</p>
+              <p className="mt-1 font-semibold tabular-nums">
+                {snapshot?.settings.defaultMilkTeaCups ?? "--"}
+              </p>
             </div>
-            <div className="rounded-[1.2rem] bg-white/75 p-3">
+            <div className="app-stat">
               <p className="text-text-muted">本月已喝</p>
-              <p className="mt-1 font-semibold">{snapshot?.currentQuota.usedCups ?? "--"}</p>
+              <p className="mt-1 font-semibold tabular-nums">
+                {snapshot?.currentQuota.usedCups ?? "--"}
+              </p>
             </div>
-            <div className="rounded-[1.2rem] bg-white/75 p-3">
+            <div className="app-stat">
               <p className="text-text-muted">奖励杯数</p>
-              <p className="mt-1 font-semibold">{snapshot?.currentQuota.bonusCups ?? "--"}</p>
+              <p className="mt-1 font-semibold tabular-nums">
+                {snapshot?.currentQuota.bonusCups ?? "--"}
+              </p>
             </div>
           </div>
 
@@ -353,7 +365,7 @@ export function SettingsPageView() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">主题与动效</CardTitle>
+          <CardTitle>主题与动效</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -399,12 +411,15 @@ export function SettingsPageView() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">数据备份</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-[1.2rem] bg-white/75 px-4 py-3 text-sm leading-6 text-text-muted">
-            所有核心数据都在浏览器本地。导出是完整 JSON 备份，导入会覆盖当前本地数据。
+          <div className="flex items-center gap-1">
+            <CardTitle>数据备份</CardTitle>
+            <InfoTip
+              text="导出会生成完整 JSON 备份；导入会覆盖当前本地数据。"
+              label="查看数据备份说明"
+            />
           </div>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-2 gap-3">
             <Button onClick={handleExport} disabled={isBusy === "export"}>
               {isBusy === "export" ? "导出中..." : "导出 JSON"}
@@ -433,15 +448,17 @@ export function SettingsPageView() {
         </CardContent>
       </Card>
 
-      <Card className="border-danger/20">
+      <Card className="border-danger/30">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">危险操作</CardTitle>
+          <div className="flex items-center gap-1">
+            <CardTitle>危险操作</CardTitle>
+            <InfoTip
+              text="清空后会删除当前浏览器里的账本、预算、奶茶额度和设置数据，不会自动恢复。"
+              label="查看危险操作说明"
+            />
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-[1.2rem] bg-danger/8 px-4 py-3 text-sm leading-6 text-text-muted">
-            清空后会删除当前浏览器里的账本、预算、奶茶额度和设置数据，不会自动恢复。
-          </div>
-
           {confirmingClear ? (
             <div className="grid grid-cols-2 gap-3">
               <Button

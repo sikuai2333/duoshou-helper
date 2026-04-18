@@ -10,13 +10,14 @@ import type { CategoryType } from "@/types/domain";
 import { AppShell } from "@/components/common/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const toneClassName = {
-  buy: "bg-essential/14 text-essential",
-  wait: "bg-secondary/24 text-foreground",
-  skip: "bg-danger/14 text-danger",
+  buy: "border-essential text-essential",
+  wait: "border-secondary text-foreground",
+  skip: "border-danger text-danger",
 } as const;
 
 export function DecisionPageView() {
@@ -43,21 +44,20 @@ export function DecisionPageView() {
 
   return (
     <AppShell>
-      <section className="surface-card rounded-[2rem] p-5">
-        <span className="inline-flex rounded-full bg-primary/12 px-3 py-1 text-xs font-semibold text-primary-strong">
-          剁手决策
-        </span>
-        <h1 className="mt-3 font-display text-[2rem] font-semibold tracking-tight">
-          先把犹豫拆开，再决定今天要不要买。
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-text-muted">
-          金额可以不填，但填了以后，建议会更贴近你这个月的真实节奏。
-        </p>
+      <section className="surface-card rounded-xl p-4">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">剁手决策</p>
+          <InfoTip
+            text="金额可以不填，但填了以后建议会更贴近这个月的真实预算节奏。"
+            label="查看决策页说明"
+          />
+        </div>
+        <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight">帮我决定</h1>
       </section>
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">给建议前，先补两项信息</CardTitle>
+          <CardTitle>给建议前，先补两项信息</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -72,7 +72,7 @@ export function DecisionPageView() {
                 id="decision-amount"
                 inputMode="decimal"
                 placeholder="不填也可以，系统会按当前节奏先判断"
-                className="h-14 pl-9 text-lg font-semibold"
+                className="h-12 pl-9 text-lg font-semibold tabular-nums"
                 value={amountDraft}
                 onChange={(event) => setAmountDraft(event.target.value)}
               />
@@ -88,10 +88,10 @@ export function DecisionPageView() {
                   type="button"
                   onClick={() => setCategory(item)}
                   className={cn(
-                    "rounded-[1.25rem] border px-4 py-3 text-left transition",
+                    "rounded-md border px-4 py-3 text-left transition-colors",
                     category === item
-                      ? "border-transparent bg-white text-foreground shadow-[0_10px_24px_rgba(83,61,47,0.1)]"
-                      : "border-border-soft bg-white/60 text-text-muted",
+                      ? "border-foreground bg-surface-strong text-foreground"
+                      : "border-border-soft bg-surface text-text-muted",
                   )}
                 >
                   <p className="text-sm font-semibold">
@@ -109,14 +109,21 @@ export function DecisionPageView() {
 
       <Card
         className={cn(
-          "soft-mask overflow-hidden",
-          suggestion ? toneClassName[suggestion.tone] : "bg-white/80 text-foreground",
+          "border-l-4",
+          suggestion ? toneClassName[suggestion.tone] : "border-border-soft text-foreground",
         )}
       >
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl">
-            {isLoading || !suggestion ? "正在读取这个月的预算节奏..." : suggestion.title}
-          </CardTitle>
+          <div className="flex items-center gap-1">
+            <CardTitle>
+              {isLoading || !suggestion ? "正在读取这个月的预算节奏..." : suggestion.title}
+            </CardTitle>
+            <InfoTip
+              text="建议会先看剩余额度占比，再看娱乐支出是否偏高，以及离月底还有多少天。"
+              label="查看决策逻辑说明"
+              widthClassName="w-64"
+            />
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm leading-6">
@@ -126,19 +133,19 @@ export function DecisionPageView() {
           </p>
           {snapshot ? (
             <div className="grid grid-cols-3 gap-3 text-sm">
-              <div className="rounded-[1.2rem] bg-white/72 p-3 text-foreground">
+              <div className="app-stat text-foreground">
                 <p className="text-text-muted">剩余额度</p>
-                <p className="mt-1 font-semibold">
+                <p className="mt-1 font-semibold tabular-nums">
                   {formatCurrency(snapshot.remainingBudget)}
                 </p>
               </div>
-              <div className="rounded-[1.2rem] bg-white/72 p-3 text-foreground">
+              <div className="app-stat text-foreground">
                 <p className="text-text-muted">娱乐已花</p>
-                <p className="mt-1 font-semibold">{formatCurrency(snapshot.funSpent)}</p>
+                <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.funSpent)}</p>
               </div>
-              <div className="rounded-[1.2rem] bg-white/72 p-3 text-foreground">
+              <div className="app-stat text-foreground">
                 <p className="text-text-muted">离月底</p>
-                <p className="mt-1 font-semibold">{snapshot.daysLeftInMonth} 天</p>
+                <p className="mt-1 font-semibold tabular-nums">{snapshot.daysLeftInMonth} 天</p>
               </div>
             </div>
           ) : null}
@@ -147,7 +154,7 @@ export function DecisionPageView() {
               {suggestion.reasons.map((reason) => (
                 <div
                   key={reason}
-                  className="rounded-[1.15rem] bg-white/72 px-4 py-3 text-sm text-foreground"
+                  className="border-b border-border-soft pb-2 text-sm text-foreground last:border-b-0 last:pb-0"
                 >
                   {reason}
                 </div>
@@ -157,24 +164,7 @@ export function DecisionPageView() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">这套建议现在怎么判断</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm leading-6 text-text-muted">
-          <div className="rounded-[1.2rem] bg-white/75 px-4 py-3">
-            先看这笔钱会吃掉多少剩余额度，比例太高就不会鼓励你立刻下手。
-          </div>
-          <div className="rounded-[1.2rem] bg-white/75 px-4 py-3">
-            如果娱乐消费已经明显偏多，同样的金额会更容易收到“再等等”。
-          </div>
-          <div className="rounded-[1.2rem] bg-white/75 px-4 py-3">
-            越接近月底，系统越倾向保守，避免最后几天预算失速。
-          </div>
-        </CardContent>
-      </Card>
-
-      <Button variant="outline" onClick={() => setAmountDraft("")}>
+      <Button variant="ghost" onClick={() => setAmountDraft("")}>
         清掉金额，回到默认判断
       </Button>
     </AppShell>

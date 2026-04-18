@@ -1,9 +1,9 @@
 export function getFadeUpMotion(reduced: boolean) {
   return {
-    initial: { opacity: 0, y: reduced ? 0 : 18 },
+    initial: { opacity: 0, y: reduced ? 0 : 10 },
     animate: { opacity: 1, y: 0 },
     transition: {
-      duration: reduced ? 0.16 : 0.32,
+      duration: reduced ? 0.12 : 0.2,
       ease: [0.22, 1, 0.36, 1] as const,
     },
   };
@@ -15,14 +15,14 @@ export function getSheetMotion(reduced: boolean) {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: reduced ? 0.12 : 0.22, ease: "easeOut" as const },
+      transition: { duration: reduced ? 0.1 : 0.18, ease: "easeOut" as const },
     },
     panel: {
-      initial: { opacity: 0, y: reduced ? 0 : 40 },
+      initial: { opacity: 0, y: reduced ? 0 : 20 },
       animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: reduced ? 0 : 28 },
+      exit: { opacity: 0, y: reduced ? 0 : 16 },
       transition: {
-        duration: reduced ? 0.16 : 0.28,
+        duration: reduced ? 0.12 : 0.22,
         ease: [0.22, 1, 0.36, 1] as const,
       },
     },

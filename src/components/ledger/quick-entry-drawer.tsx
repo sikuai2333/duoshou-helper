@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { z } from "zod";
 import { CATEGORY_META, QUICK_EMOJIS } from "@/constants/app";
@@ -92,7 +92,7 @@ function EntryFormBody({
             id="amount"
             inputMode="decimal"
             placeholder="比如 38"
-            className="h-14 pl-9 text-lg font-semibold"
+            className="h-12 pl-9 text-lg font-semibold tabular-nums"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
           />
@@ -108,16 +108,16 @@ function EntryFormBody({
               type="button"
               onClick={() => handleCategoryChange(item)}
               className={cn(
-                "rounded-[1.25rem] border px-4 py-3 text-left transition",
+                "rounded-md border px-4 py-3 text-left transition-colors",
                 category === item
-                  ? "border-transparent bg-white text-foreground shadow-[0_10px_24px_rgba(83,61,47,0.1)]"
-                  : "border-border-soft bg-white/60 text-text-muted",
+                  ? "border-foreground bg-surface-strong text-foreground"
+                  : "border-border-soft bg-surface text-text-muted",
               )}
             >
               <p className="text-sm font-semibold">
                 {CATEGORY_META[item].emoji} {CATEGORY_META[item].label}
               </p>
-              <p className="mt-1 text-xs">点一下就归类，不用多想</p>
+              <p className="mt-1 text-xs">点一下就归类</p>
             </button>
           ))}
         </div>
@@ -132,10 +132,10 @@ function EntryFormBody({
               type="button"
               onClick={() => setEmoji(item)}
               className={cn(
-                "flex h-12 items-center justify-center rounded-[1rem] border text-xl transition",
+                "flex h-11 items-center justify-center rounded-md border text-xl transition-colors",
                 emoji === item
-                  ? "border-transparent bg-white shadow-[0_10px_24px_rgba(83,61,47,0.1)]"
-                  : "border-border-soft bg-white/65",
+                  ? "border-foreground bg-surface-strong"
+                  : "border-border-soft bg-surface",
               )}
             >
               {item}
@@ -145,9 +145,7 @@ function EntryFormBody({
       </div>
 
       {errorMessage ? (
-        <div className="rounded-[1.1rem] bg-danger/10 px-4 py-3 text-sm text-danger">
-          {errorMessage}
-        </div>
+        <div className="app-feedback border-danger text-sm text-danger">{errorMessage}</div>
       ) : null}
 
       <div className="grid grid-cols-2 gap-3">
@@ -161,8 +159,6 @@ function EntryFormBody({
     </div>
   );
 }
-
-import { useState } from "react";
 
 export function QuickEntryDrawer() {
   const isOpen = useUiStore((state) => state.isQuickEntryOpen);
@@ -194,13 +190,13 @@ export function QuickEntryDrawer() {
     >
       {isEditing && editingEntry === undefined ? (
         <div className="space-y-3">
-          <div className="h-12 animate-pulse rounded-[1.2rem] bg-white/70" />
-          <div className="h-24 animate-pulse rounded-[1.2rem] bg-white/70" />
-          <div className="h-24 animate-pulse rounded-[1.2rem] bg-white/70" />
+          <div className="h-10 animate-pulse rounded-md bg-surface-strong" />
+          <div className="h-24 animate-pulse rounded-md bg-surface-strong" />
+          <div className="h-24 animate-pulse rounded-md bg-surface-strong" />
         </div>
       ) : editingEntryId && !editingEntry ? (
         <div className="space-y-4">
-          <div className="rounded-[1.2rem] bg-danger/10 px-4 py-3 text-sm text-danger">
+          <div className="app-feedback border-danger text-sm text-danger">
             这条记录已经不存在了，可能刚刚被删除。
           </div>
           <Button variant="outline" className="w-full" onClick={closeQuickEntry}>

@@ -21,6 +21,7 @@ import { AppShell } from "@/components/common/app-shell";
 import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface EntriesPanelProps {
@@ -43,27 +44,27 @@ function EntriesPanel({
   const total = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
   if (isLoading) {
-    return <Card className="h-52 animate-pulse rounded-[1.75rem] bg-white/70" />;
+    return <Card className="h-44 animate-pulse bg-surface-strong" />;
   }
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <span className="inline-flex w-fit rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-foreground/80">
+      <CardHeader className="pb-2">
+        <p className="app-eyebrow">
           {CATEGORY_META[category].emoji} {CATEGORY_META[category].label}
-        </span>
-        <CardTitle className="text-xl">本月合计 {formatCurrency(total)}</CardTitle>
+        </p>
+        <CardTitle>本月合计 {formatCurrency(total)}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {filteredEntries.length === 0 ? (
-          <div className="rounded-[1.25rem] bg-white/75 px-4 py-6 text-sm text-text-muted">
+          <div className="app-feedback text-sm text-text-muted">
             这个分类还没有记录。你可以先记一笔，或者切到另一个月份看看。
           </div>
         ) : (
           filteredEntries.map((entry) => (
             <div
               key={entry.id}
-              className="rounded-[1.25rem] bg-white/75 px-4 py-3 shadow-sm"
+              className="border-b border-border-soft pb-3 last:border-b-0 last:pb-0"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -72,7 +73,7 @@ function EntriesPanel({
                   </p>
                   <p className="text-xs text-text-muted">{getFriendlyDate(entry.createdAt)}</p>
                 </div>
-                <p className="font-display text-lg font-semibold">
+                <p className="text-base font-semibold tabular-nums">
                   {formatCurrency(entry.amount)}
                 </p>
               </div>
@@ -139,15 +140,17 @@ export function LedgerPageView() {
   return (
     <>
       <AppShell>
-        <section className="surface-card rounded-[2rem] p-5">
+        <section className="surface-card rounded-xl p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
-              <span className="inline-flex rounded-full bg-secondary/18 px-3 py-1 text-xs font-semibold text-foreground">
-                账本页
-              </span>
-              <h1 className="font-display text-[2rem] font-semibold tracking-tight">
-                记、改、删都放在一页里，别让记账把人劝退。
-              </h1>
+              <div className="flex items-center gap-1">
+                <p className="app-eyebrow">账本</p>
+                <InfoTip
+                  text="新增、编辑、删除、筛选和按月查看都集中在这一页，避免在多个页面之间来回跳。"
+                  label="查看账本说明"
+                />
+              </div>
+              <h1 className="text-[1.85rem] font-semibold tracking-tight">账本</h1>
               <p className="text-sm leading-6 text-text-muted">
                 当前查看 {getMonthLabel(getMonthDate(currentMonthKey))}，本月总支出{" "}
                 <span className="font-semibold text-foreground">
@@ -161,14 +164,12 @@ export function LedgerPageView() {
         </section>
 
         {feedback ? (
-          <div className="rounded-[1.25rem] bg-white/78 px-4 py-3 text-sm text-text-muted">
-            {feedback}
-          </div>
+          <div className="app-feedback text-sm text-text-muted">{feedback}</div>
         ) : null}
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl">按月查看</CardTitle>
+            <CardTitle>按月查看</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
@@ -178,9 +179,9 @@ export function LedgerPageView() {
               >
                 上个月
               </Button>
-              <div className="rounded-[1.25rem] bg-white/75 px-4 py-3 text-center">
+              <div className="rounded-md border border-border-soft bg-surface-strong px-4 py-3 text-center">
                 <p className="text-xs text-text-muted">当前月份</p>
-                <p className="font-display text-lg font-semibold">
+                <p className="mt-1 text-base font-semibold tabular-nums">
                   {getMonthLabel(getMonthDate(currentMonthKey))}
                 </p>
               </div>
@@ -200,8 +201,8 @@ export function LedgerPageView() {
                   onClick={() => setCurrentMonthKey(monthKey)}
                   className={
                     monthKey === currentMonthKey
-                      ? "rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-                      : "rounded-full bg-white/80 px-4 py-2 text-sm text-text-muted"
+                      ? "rounded-md border border-primary bg-primary px-3 py-2 text-sm font-medium text-white"
+                      : "rounded-md border border-border-soft bg-surface px-3 py-2 text-sm text-text-muted"
                   }
                 >
                   {getMonthLabel(getMonthDate(monthKey))}

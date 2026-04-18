@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Sans } from "next/font/google";
 import { AppProviders } from "@/components/common/app-providers";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -23,12 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className={`${spaceGrotesk.variable} h-full antialiased`}>
+    <html lang="zh-CN" className={`${ibmPlexSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>
-          <div className="relative flex min-h-screen flex-col">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_center,_rgba(255,211,114,0.18),_transparent_72%)]" />
-            <div className="pointer-events-none absolute inset-x-8 top-36 h-56 rounded-full bg-[radial-gradient(circle_at_center,_rgba(255,125,168,0.14),_transparent_72%)] blur-3xl" />
+          <div className="relative flex min-h-screen flex-col bg-background">
             {children}
             <BottomNavigation />
           </div>

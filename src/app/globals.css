@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff6ef;
-  --foreground: #2c211d;
-  --surface: rgba(255, 250, 245, 0.84);
-  --surface-strong: #fffaf6;
-  --primary: #ff8c6b;
-  --primary-strong: #ff6f47;
-  --accent: #8fd9c7;
-  --secondary: #ffd372;
-  --essential: #80bf7f;
-  --fun: #ff7da8;
-  --border-soft: rgba(134, 88, 66, 0.12);
-  --text-muted: #7a665d;
-  --danger: #e96876;
-  --shadow-card: 0 24px 60px rgba(168, 110, 79, 0.14);
+  --background: #f5f1ea;
+  --foreground: #2d2926;
+  --surface: #fffdfa;
+  --surface-strong: #f8f3ed;
+  --primary: #a45a2a;
+  --primary-strong: #8e4c21;
+  --accent: #5d7a62;
+  --secondary: #c49f42;
+  --essential: #5c8158;
+  --fun: #ab5f74;
+  --border-soft: #d7cec1;
+  --text-muted: #746a60;
+  --danger: #b4524d;
+  --shadow-card: 0 2px 8px rgba(45, 41, 38, 0.06);
   --font-body:
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+    var(--font-ibm-plex-sans), "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
 }
 
 @theme inline {
@@ -34,7 +35,6 @@
   --color-text-muted: var(--text-muted);
   --color-danger: var(--danger);
   --font-sans: var(--font-body);
-  --font-display: var(--font-space-grotesk);
 }
 
 * {
@@ -52,28 +52,27 @@ html[data-theme="light"] {
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --background: #1b1516;
-  --foreground: #f7e9e3;
-  --surface: rgba(43, 32, 34, 0.88);
-  --surface-strong: #241c1d;
-  --primary: #ff9b79;
-  --primary-strong: #ffb394;
-  --accent: #72c4b5;
-  --secondary: #e8b85d;
-  --essential: #7fcf8c;
-  --fun: #ff8ab2;
-  --border-soft: rgba(255, 240, 232, 0.1);
-  --text-muted: #c2aaa1;
-  --danger: #ff8f9d;
-  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.28);
+  --background: #1a1918;
+  --foreground: #f1ece6;
+  --surface: #23211f;
+  --surface-strong: #1f1d1c;
+  --primary: #cb8b5a;
+  --primary-strong: #dc9a68;
+  --accent: #7ea98a;
+  --secondary: #d8b560;
+  --essential: #86b27f;
+  --fun: #cf8598;
+  --border-soft: #37322e;
+  --text-muted: #b3a79b;
+  --danger: #d57c78;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.24);
 }
 
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(255, 166, 125, 0.24), transparent 30%),
-    radial-gradient(circle at top right, rgba(143, 217, 199, 0.24), transparent 34%),
-    linear-gradient(180deg, #fff8f2 0%, #fff6ef 45%, #fff3ea 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 10rem),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
   text-rendering: optimizeLegibility;
@@ -81,7 +80,7 @@ body {
 }
 
 ::selection {
-  background: rgba(255, 140, 107, 0.2);
+  background: rgba(164, 90, 42, 0.2);
 }
 
 @layer base {
@@ -104,18 +103,17 @@ body {
 
 @layer utilities {
   .app-container {
-    width: min(100%, 30rem);
+    width: min(100%, 34rem);
     margin-inline: auto;
     padding-inline: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 6.75rem;
+    padding-top: 1.25rem;
+    padding-bottom: 5.75rem;
   }
 
   .surface-card {
     background: var(--surface);
     border: 1px solid var(--border-soft);
     box-shadow: var(--shadow-card);
-    backdrop-filter: blur(16px);
   }
 
   .surface-card-strong {
@@ -128,16 +126,25 @@ body {
     text-wrap: balance;
   }
 
-  .soft-mask {
-    position: relative;
-    overflow: hidden;
+  .app-eyebrow {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
   }
 
-  .soft-mask::after {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 60%);
-    content: "";
-    pointer-events: none;
+  .app-stat {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--surface) 92%, var(--background));
+    padding: 0.875rem;
+  }
+
+  .app-feedback {
+    border-left: 3px solid var(--border-soft);
+    background: color-mix(in srgb, var(--surface) 94%, var(--background));
+    padding: 0.875rem 1rem;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }

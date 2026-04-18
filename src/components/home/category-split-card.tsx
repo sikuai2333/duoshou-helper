@@ -3,6 +3,7 @@ import { formatCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import type { DashboardSnapshot } from "@/types/domain";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 
 interface CategorySplitCardProps {
   snapshot: DashboardSnapshot;
@@ -16,20 +17,22 @@ export function CategorySplitCard({ snapshot }: CategorySplitCardProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-4">
-        <span className="inline-flex w-fit rounded-full bg-accent/16 px-3 py-1 text-xs font-medium text-foreground/80">
-          分类统计
-        </span>
-        <CardTitle className="text-xl">钱主要流向哪里，一眼就能看出来</CardTitle>
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">分类统计</p>
+          <InfoTip
+            text="这里只看生活必需和娱乐两类，帮助你快速判断本月花钱的重心。"
+            label="查看分类说明"
+          />
+        </div>
+        <CardTitle>分类分布</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {totalSpent === 0 ? (
-          <div className="rounded-[1.25rem] bg-white/75 px-4 py-4 text-sm leading-6 text-text-muted">
-            还没有任何支出记录。等你记下第一笔后，这里会告诉你本月是更偏生活必需，还是更偏娱乐消费。
-          </div>
+          <div className="text-sm text-text-muted">记下第一笔之后，这里会开始分布统计。</div>
         ) : (
-          <div className="overflow-hidden rounded-full bg-white/75 p-1">
-            <div className="flex h-3 overflow-hidden rounded-full">
+          <div className="h-2 overflow-hidden rounded-sm bg-surface-strong">
+            <div className="flex h-full overflow-hidden">
               <div className="bg-essential" style={{ width: `${essentialRatio}%` }} />
               <div className="bg-fun" style={{ width: `${funRatio}%` }} />
             </div>
@@ -40,14 +43,14 @@ export function CategorySplitCard({ snapshot }: CategorySplitCardProps) {
             <div
               key={category}
               className={cn(
-                "rounded-[1.3rem] bg-white/80 p-4 ring-1 ring-inset",
-                category === "essential" ? "ring-essential/18" : "ring-fun/18",
+                "rounded-lg border p-4",
+                category === "essential" ? "border-essential/30" : "border-fun/30",
               )}
             >
               <p className="text-sm text-text-muted">
                 {CATEGORY_META[category].emoji} {CATEGORY_META[category].label}
               </p>
-              <p className="mt-2 text-lg font-semibold">
+              <p className="mt-2 text-lg font-semibold tabular-nums">
                 {formatCurrency(
                   category === "essential" ? snapshot.essentialSpent : snapshot.funSpent,
                 )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { cn } from "@/lib/utils";
 import type { DashboardSnapshot } from "@/types/domain";
 
@@ -19,22 +20,26 @@ export function DecisionGlanceCard({ snapshot }: DecisionGlanceCardProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <span className="inline-flex w-fit rounded-full bg-primary/12 px-3 py-1 text-xs font-medium text-primary-strong">
-          💡 今日决策
-        </span>
-        <CardTitle className="text-xl">当前状态下，剁手建议是这样</CardTitle>
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">💡 今日决策</p>
+          <InfoTip
+            text="建议会结合剩余额度、娱乐支出占比和离月底还有多少天，不是固定文案。"
+            label="查看决策卡说明"
+          />
+        </div>
+        <CardTitle>今日建议</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-[1.35rem] bg-white/78 p-4">
-          <span
+        <div className="border-l-4 border-border-soft bg-surface-strong px-4 py-4">
+          <p
             className={cn(
-              "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+              "text-sm font-semibold",
               toneStyles[isBlankMonth ? "wait" : snapshot.suggestion.tone],
             )}
           >
             {isBlankMonth ? "先记一笔会更准" : snapshot.suggestion.title}
-          </span>
+          </p>
           <p className="mt-3 text-sm leading-6 text-text-muted">
             {isBlankMonth
               ? "现在预算还是空白节奏，系统还没观察到你的本月消费习惯。先记下一笔，后面的建议会更像在陪你做决定。"
