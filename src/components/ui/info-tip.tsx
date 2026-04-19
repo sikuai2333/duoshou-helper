@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { CircleHelp } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMotionPreference } from "@/hooks/use-motion-preference";
+import { getAppOverlayRoot, getAppScreenElement } from "@/lib/portal";
 import { cn } from "@/lib/utils";
 
 interface InfoTipProps {
@@ -33,6 +34,8 @@ export function InfoTip({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const canPortal = typeof document !== "undefined";
+  const portalContainer = canPortal ? getAppOverlayRoot() : null;
+  const screenElement = canPortal ? getAppScreenElement() : null;
 
   useEffect(() => {
     if (!open) {
@@ -54,13 +57,26 @@ export function InfoTip({
       }
 
       const rect = triggerRef.current.getBoundingClientRect();
-      const width = Math.min(maxWidth, window.innerWidth - VIEWPORT_PADDING * 2);
-      const idealLeft = align === "left" ? rect.left : rect.right - width;
+      const containerRect = screenElement?.getBoundingClientRect() ??
+        portalContainer?.getBoundingClientRect() ?? {
+        top: 0,
+        left: 0,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+      const width = Math.min(maxWidth, containerRect.width - VIEWPORT_PADDING * 2);
+      const idealLeft =
+        align === "left"
+          ? rect.left - containerRect.left
+          : rect.right - containerRect.left - width;
       const left = Math.min(
         Math.max(VIEWPORT_PADDING, idealLeft),
-        window.innerWidth - width - VIEWPORT_PADDING,
+        containerRect.width - width - VIEWPORT_PADDING,
       );
-      const top = Math.min(rect.bottom + 8, window.innerHeight - 72);
+      const top = Math.min(
+        rect.bottom - containerRect.top + 8,
+        containerRect.height - 72,
+      );
 
       setPosition({ top, left, width });
     };
@@ -73,7 +89,7 @@ export function InfoTip({
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [align, maxWidth, open]);
+  }, [align, maxWidth, open, portalContainer, screenElement]);
 
   useEffect(() => {
     if (!open) {
@@ -104,7 +120,10 @@ export function InfoTip({
               left: position.left,
               width: position.width,
             }}
-            className="fixed z-50 rounded-md border border-border-soft bg-surface px-3 py-2 text-xs leading-5 text-text-muted shadow-[0_2px_8px_rgba(45,41,38,0.08)]"
+            className={cn(
+              "z-50 rounded-md border border-border-soft bg-surface px-3 py-2 text-xs leading-5 text-text-muted shadow-[0_2px_8px_rgba(45,41,38,0.08)]",
+              portalContainer ? "absolute pointer-events-auto" : "fixed",
+            )}
             initial={{ opacity: 0, y: reducedMotion ? 0 : 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: reducedMotion ? 0 : 4 }}
@@ -113,7 +132,7 @@ export function InfoTip({
             {text}
           </motion.div>
         </AnimatePresence>,
-        document.body,
+        portalContainer ?? document.body,
       )
     : null;
 

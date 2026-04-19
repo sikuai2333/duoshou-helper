@@ -30,8 +30,9 @@ export default function RootLayout({
         <AppProviders>
           <div className="app-stage">
             <div className="app-device-shell">
-              <div className="app-device-screen">
+              <div id="app-device-screen" className="app-device-screen">
                 <div className="app-scroll-region">{children}</div>
+                <div id="app-overlay-root" className="app-overlay-root" />
                 <FloatingActionMenu />
                 <BottomNavigation />
               </div>

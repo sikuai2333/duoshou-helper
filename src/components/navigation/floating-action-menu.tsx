@@ -13,13 +13,13 @@ const FAB_ITEMS = [
     id: "decision",
     label: "帮我决定",
     icon: Gamepad2,
-    accentClassName: "border-fun/20 bg-fun/[0.12] text-foreground",
+    accentClassName: "border-fun/25 bg-fun/[0.12] text-foreground",
   },
   {
     id: "entry",
     label: "记一笔",
     icon: Plus,
-    accentClassName: "border-primary/20 bg-primary/[0.12] text-foreground",
+    accentClassName: "border-primary/25 bg-primary/[0.12] text-foreground",
   },
 ] as const;
 
@@ -44,7 +44,7 @@ export function FloatingActionMenu() {
   };
 
   return (
-    <div className="pointer-events-none absolute bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-50 flex flex-col items-end gap-3">
+    <div className="pointer-events-none absolute bottom-[calc(5.65rem+env(safe-area-inset-bottom))] right-4 z-50 flex flex-col items-end gap-3">
       <AnimatePresence>
         {open ? (
           <motion.div
@@ -63,10 +63,7 @@ export function FloatingActionMenu() {
                   key={item.id}
                   type="button"
                   onClick={handleClick}
-                  className={cn(
-                    "flex items-center gap-2 rounded-full border px-3 py-2 shadow-[0_8px_24px_rgba(45,41,38,0.12)] backdrop-blur-sm",
-                    item.accentClassName,
-                  )}
+                  className="flex items-center gap-2"
                   initial={{ opacity: 0, x: 10, y: reducedMotion ? 0 : 8 }}
                   animate={{ opacity: 1, x: 0, y: 0 }}
                   exit={{ opacity: 0, x: 8, y: reducedMotion ? 0 : 6 }}
@@ -76,10 +73,15 @@ export function FloatingActionMenu() {
                     ease: "easeOut",
                   }}
                 >
-                  <span className="rounded-full bg-surface px-2 py-1 text-xs font-medium leading-none text-text-muted">
+                  <span className="rounded-full border border-border-soft/80 bg-surface/92 px-2.5 py-1 text-[11px] font-medium leading-none text-text-muted shadow-[0_6px_18px_rgba(45,41,38,0.08)] backdrop-blur-sm">
                     {item.label}
                   </span>
-                  <span className="flex size-9 items-center justify-center rounded-full bg-surface text-foreground">
+                  <span
+                    className={cn(
+                      "flex size-11 items-center justify-center rounded-full border shadow-[0_10px_24px_rgba(45,41,38,0.12)] backdrop-blur-sm",
+                      item.accentClassName,
+                    )}
+                  >
                     <Icon className="size-[18px]" />
                   </span>
                 </motion.button>

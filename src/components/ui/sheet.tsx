@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMotionPreference } from "@/hooks/use-motion-preference";
 import { getSheetMotion } from "@/lib/motion";
+import { getAppOverlayRoot } from "@/lib/portal";
 import { cn } from "@/lib/utils";
 
 interface SheetProps {
@@ -26,15 +27,17 @@ export function Sheet({
 }: SheetProps) {
   const reducedMotion = useMotionPreference();
   const motionConfig = getSheetMotion(reducedMotion);
+  const portalContainer =
+    typeof document !== "undefined" ? getAppOverlayRoot() : null;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
         {open ? (
-          <Dialog.Portal forceMount>
+          <Dialog.Portal forceMount container={portalContainer ?? undefined}>
             <Dialog.Overlay asChild>
               <motion.div
-                className="fixed inset-0 z-50 bg-[rgba(32,29,27,0.48)]"
+                className="absolute inset-0 z-50 bg-[rgba(32,29,27,0.48)] pointer-events-auto"
                 initial={motionConfig.overlay.initial}
                 animate={motionConfig.overlay.animate}
                 exit={motionConfig.overlay.exit}
@@ -44,7 +47,7 @@ export function Sheet({
             <Dialog.Content asChild onOpenAutoFocus={(event) => event.preventDefault()}>
               <motion.div
                 className={cn(
-                  "fixed inset-x-0 bottom-0 z-50 rounded-t-xl border border-border-soft bg-surface px-5 pb-6 pt-3 shadow-[0_-8px_20px_rgba(32,29,27,0.12)]",
+                  "absolute inset-x-0 bottom-0 z-[51] rounded-t-[1.35rem] border border-border-soft bg-surface px-5 pb-6 pt-3 shadow-[0_-8px_20px_rgba(32,29,27,0.12)] pointer-events-auto",
                   className,
                 )}
                 initial={motionConfig.panel.initial}
