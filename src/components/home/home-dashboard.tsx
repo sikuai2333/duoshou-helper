@@ -12,7 +12,6 @@ import { CategorySplitCard } from "@/components/home/category-split-card";
 import { DecisionGlanceCard } from "@/components/home/decision-glance-card";
 import { MilkTeaCard } from "@/components/home/milk-tea-card";
 import { MonthProgressCard } from "@/components/home/month-progress-card";
-import { QuickActions } from "@/components/home/quick-actions";
 import { RecentEntriesCard } from "@/components/home/recent-entries-card";
 import { Card } from "@/components/ui/card";
 import { InfoTip } from "@/components/ui/info-tip";
@@ -90,7 +89,6 @@ export function HomeDashboard() {
             <MilkTeaCard snapshot={snapshot} />
             <DecisionGlanceCard snapshot={snapshot} />
             <RecentEntriesCard snapshot={snapshot} onQuickEntry={() => openQuickEntry()} />
-            <QuickActions onQuickEntry={openQuickEntry} />
           </>
         )}
       </AppShell>

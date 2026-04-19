@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { AppProviders } from "@/components/common/app-providers";
+import { FloatingActionMenu } from "@/components/navigation/floating-action-menu";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
             <div className="app-device-shell">
               <div className="app-device-screen">
                 <div className="app-scroll-region">{children}</div>
+                <FloatingActionMenu />
                 <BottomNavigation />
               </div>
             </div>
