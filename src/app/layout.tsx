@@ -30,7 +30,7 @@ export default function RootLayout({
           <div className="app-stage">
             <div className="app-device-shell">
               <div className="app-device-screen">
-                {children}
+                <div className="app-scroll-region">{children}</div>
                 <BottomNavigation />
               </div>
             </div>

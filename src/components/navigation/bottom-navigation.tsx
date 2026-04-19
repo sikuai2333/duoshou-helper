@@ -10,7 +10,7 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-[34rem] -translate-x-1/2 lg:absolute lg:inset-x-0 lg:bottom-0 lg:max-w-none lg:translate-x-0">
+    <nav className="pointer-events-none absolute inset-x-0 bottom-0 z-40">
       <div className="pointer-events-auto flex w-full items-stretch border-t border-border-soft bg-surface/98 pb-[max(env(safe-area-inset-bottom),0px)] backdrop-blur-sm">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
