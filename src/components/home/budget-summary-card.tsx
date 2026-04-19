@@ -14,13 +14,20 @@ export function BudgetSummaryCard({ snapshot }: BudgetSummaryCardProps) {
   );
 
   return (
-    <Card>
+    <Card className="border-primary/55 bg-primary/[0.06]">
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-1">
-          <p className="app-eyebrow">预算总览</p>
-          <InfoTip text="先看剩余额度，再决定这笔钱要不要花。" label="查看预算说明" />
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-1">
+              <p className="app-eyebrow">预算总览</p>
+              <InfoTip text="先看剩余额度，再决定这笔钱要不要花。" label="查看预算说明" />
+            </div>
+            <CardTitle>剩余额度</CardTitle>
+          </div>
+          <div className="rounded-md border border-primary/20 bg-primary/12 px-2.5 py-1 text-xs font-medium tabular-nums text-foreground">
+            已用 {spentRatio}%
+          </div>
         </div>
-        <CardTitle>剩余额度</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-1">
@@ -30,15 +37,15 @@ export function BudgetSummaryCard({ snapshot }: BudgetSummaryCardProps) {
           </p>
         </div>
         <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="app-stat">
+          <div className="app-stat border-primary/20 bg-primary/[0.09]">
             <p className="text-text-muted">月预算</p>
             <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.budget)}</p>
           </div>
-          <div className="app-stat">
+          <div className="app-stat border-fun/20 bg-fun/[0.08]">
             <p className="text-text-muted">已花</p>
             <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.monthSpent)}</p>
           </div>
-          <div className="app-stat">
+          <div className="app-stat border-secondary/20 bg-secondary/[0.12]">
             <p className="text-text-muted">进度</p>
             <p className="mt-1 font-semibold tabular-nums">{spentRatio}%</p>
           </div>

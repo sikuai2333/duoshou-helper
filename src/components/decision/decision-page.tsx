@@ -20,6 +20,12 @@ const toneClassName = {
   skip: "border-danger text-danger",
 } as const;
 
+const toneCardClassName = {
+  buy: "bg-essential/[0.05]",
+  wait: "bg-secondary/[0.05]",
+  skip: "bg-danger/[0.05]",
+} as const;
+
 export function DecisionPageView() {
   const currentMonthKey = useAppStore((state) => state.currentMonthKey);
   const { snapshot, isLoading } = useDashboardData(currentMonthKey);
@@ -44,7 +50,7 @@ export function DecisionPageView() {
 
   return (
     <AppShell>
-      <section className="surface-card rounded-xl p-4">
+      <section className="surface-card rounded-xl border border-secondary/45 bg-secondary/[0.06] p-4">
         <div className="flex items-center gap-1">
           <p className="app-eyebrow">剁手决策</p>
           <InfoTip
@@ -55,9 +61,9 @@ export function DecisionPageView() {
         <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight">帮我决定</h1>
       </section>
 
-      <Card>
+      <Card className="border-fun/45 bg-fun/[0.05]">
         <CardHeader className="pb-4">
-          <CardTitle>给建议前，先补两项信息</CardTitle>
+          <CardTitle>先补两项信息</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -90,7 +96,9 @@ export function DecisionPageView() {
                   className={cn(
                     "rounded-md border px-4 py-3 text-left transition-colors",
                     category === item
-                      ? "border-foreground bg-surface-strong text-foreground"
+                      ? item === "essential"
+                        ? "border-essential/35 bg-essential/[0.1] text-foreground"
+                        : "border-fun/35 bg-fun/[0.1] text-foreground"
                       : "border-border-soft bg-surface text-text-muted",
                   )}
                 >
@@ -111,6 +119,7 @@ export function DecisionPageView() {
         className={cn(
           "border-l-4",
           suggestion ? toneClassName[suggestion.tone] : "border-border-soft text-foreground",
+          suggestion ? toneCardClassName[suggestion.tone] : undefined,
         )}
       >
         <CardHeader className="pb-3">
@@ -121,7 +130,7 @@ export function DecisionPageView() {
             <InfoTip
               text="建议会先看剩余额度占比，再看娱乐支出是否偏高，以及离月底还有多少天。"
               label="查看决策逻辑说明"
-              widthClassName="w-64"
+              maxWidth={320}
             />
           </div>
         </CardHeader>

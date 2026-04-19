@@ -10,6 +10,7 @@ import type { BudgetMode, MotionLevel, ThemeMode } from "@/types/domain";
 import { AppShell } from "@/components/common/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { InfoTip } from "@/components/ui/info-tip";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -198,7 +199,7 @@ export function SettingsPageView() {
 
   return (
     <AppShell>
-      <section className="surface-card rounded-xl p-4">
+      <section className="surface-card rounded-xl border border-accent/45 bg-accent/[0.06] p-4">
         <div className="flex items-center gap-1">
           <p className="app-eyebrow">设置</p>
           <InfoTip
@@ -222,24 +223,24 @@ export function SettingsPageView() {
         </div>
       ) : null}
 
-      <Card>
+      <Card className="border-accent/55 bg-accent/[0.05]">
         <CardHeader className="pb-4">
           <CardTitle>当前本地状态</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-3 text-sm">
-          <div className="app-stat">
+          <div className="app-stat border-primary/20 bg-primary/[0.08]">
             <p className="text-text-muted">记录数</p>
             <p className="mt-1 font-semibold tabular-nums">
               {isLoading ? "--" : snapshot?.totalEntries}
             </p>
           </div>
-          <div className="app-stat">
+          <div className="app-stat border-fun/20 bg-fun/[0.08]">
             <p className="text-text-muted">奖励记录</p>
             <p className="mt-1 font-semibold tabular-nums">
               {isLoading ? "--" : snapshot?.totalRewards}
             </p>
           </div>
-          <div className="app-stat">
+          <div className="app-stat border-accent/20 bg-accent/[0.08]">
             <p className="text-text-muted">已追踪月份</p>
             <p className="mt-1 font-semibold tabular-nums">
               {isLoading ? "--" : snapshot?.trackedMonths}
@@ -248,246 +249,247 @@ export function SettingsPageView() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle>月预算设置</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {(["fixed", "manual"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setModeDraft(mode)}
-                className={cn(
-                  "rounded-md border px-4 py-3 text-left transition-colors",
-                  selectedMode === mode
-                    ? "border-foreground bg-surface-strong"
-                    : "border-border-soft bg-surface text-text-muted",
-                )}
+      <CollapsibleCard
+        eyebrow="预算"
+        title="月预算设置"
+        summary={
+          <span className="tabular-nums">
+            {selectedMode === "fixed" ? "固定预算" : "本月手动"} · ¥{budgetValue || "--"}
+          </span>
+        }
+        accentClassName="border-primary/55"
+        className="bg-primary/[0.05]"
+        summaryClassName="border-primary/15 bg-primary/[0.08] text-foreground"
+      >
+        <div className="grid grid-cols-2 gap-3">
+          {(["fixed", "manual"] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setModeDraft(mode)}
+              className={cn(
+                "rounded-md border px-4 py-3 text-left transition-colors",
+                selectedMode === mode
+                  ? mode === "fixed"
+                    ? "border-primary/35 bg-primary/[0.1]"
+                    : "border-secondary/35 bg-secondary/[0.12]"
+                  : "border-border-soft bg-surface text-text-muted",
+              )}
+            >
+              <p className="text-sm font-semibold">{mode === "fixed" ? "固定预算" : "本月手动"}</p>
+              <p className="mt-1 text-xs">
+                {mode === "fixed" ? "后续月份默认沿用这个值" : "本月单独调整，不强制沿用"}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground" htmlFor="budget-input">
+            本月预算
+          </label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-text-muted">
+              ¥
+            </span>
+            <Input
+              id="budget-input"
+              inputMode="decimal"
+              className="h-12 pl-9 text-lg font-semibold tabular-nums"
+              value={budgetValue}
+              onChange={(event) => setBudgetDraft(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <Button className="w-full" onClick={handleBudgetSave} disabled={isBusy === "budget"}>
+          {isBusy === "budget" ? "保存中..." : "保存预算规则"}
+        </Button>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        eyebrow="奶茶"
+        title="奶茶额度与奖励"
+        summary={
+          <span className="tabular-nums">
+            默认 {snapshot?.settings.defaultMilkTeaCups ?? "--"} 杯 · 奖励{" "}
+            {snapshot?.currentQuota.bonusCups ?? "--"} 杯
+          </span>
+        }
+        accentClassName="border-fun/55"
+        className="bg-fun/[0.05]"
+        summaryClassName="border-fun/15 bg-fun/[0.08] text-foreground"
+      >
+        <div className="grid grid-cols-3 gap-3 text-sm">
+          <div className="app-stat border-fun/20 bg-fun/[0.08]">
+            <p className="text-text-muted">默认杯数</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {snapshot?.settings.defaultMilkTeaCups ?? "--"}
+            </p>
+          </div>
+          <div className="app-stat border-secondary/20 bg-secondary/[0.08]">
+            <p className="text-text-muted">本月已喝</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {snapshot?.currentQuota.usedCups ?? "--"}
+            </p>
+          </div>
+          <div className="app-stat border-accent/20 bg-accent/[0.08]">
+            <p className="text-text-muted">奖励杯数</p>
+            <p className="mt-1 font-semibold tabular-nums">
+              {snapshot?.currentQuota.bonusCups ?? "--"}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground" htmlFor="cups-input">
+            默认总杯数
+          </label>
+          <Input
+            id="cups-input"
+            inputMode="numeric"
+            value={cupsValue}
+            onChange={(event) => setCupsDraft(event.target.value)}
+          />
+        </div>
+
+        <Button className="w-full" onClick={handleMilkTeaSave} disabled={isBusy === "cups"}>
+          {isBusy === "cups" ? "保存中..." : "保存默认杯数"}
+        </Button>
+
+        <div className="grid grid-cols-[1fr_auto] gap-3">
+          <Input
+            inputMode="numeric"
+            value={rewardDraft}
+            onChange={(event) => setRewardDraft(event.target.value)}
+          />
+          <Button variant="outline" onClick={handleManualReward} disabled={isBusy === "reward"}>
+            {isBusy === "reward" ? "处理中..." : "手动加杯"}
+          </Button>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        eyebrow="外观"
+        title="主题与动效"
+        summary={`${selectedTheme === "system" ? "跟随系统" : selectedTheme === "light" ? "浅色" : "深色"} · ${selectedMotion === "full" ? "完整动效" : "降低动效"}`}
+        accentClassName="border-secondary/55"
+        className="bg-secondary/[0.05]"
+        summaryClassName="border-secondary/15 bg-secondary/[0.08] text-foreground"
+      >
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">主题模式</p>
+          <div className="grid grid-cols-3 gap-3">
+            {([
+              ["system", "跟随系统"],
+              ["light", "浅色"],
+              ["dark", "深色"],
+            ] as const).map(([value, label]) => (
+              <Button
+                key={value}
+                variant={selectedTheme === value ? "default" : "outline"}
+                onClick={() => handleThemeChange(value)}
+                disabled={isBusy === `theme-${value}`}
               >
-                <p className="text-sm font-semibold">
-                  {mode === "fixed" ? "固定预算" : "本月手动"}
-                </p>
-                <p className="mt-1 text-xs">
-                  {mode === "fixed" ? "后续月份默认沿用这个值" : "本月单独调整，不强制沿用"}
-                </p>
-              </button>
+                {label}
+              </Button>
             ))}
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground" htmlFor="budget-input">
-              本月预算
-            </label>
-            <div className="relative">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-text-muted">
-                ¥
-              </span>
-              <Input
-                id="budget-input"
-                inputMode="decimal"
-                className="h-12 pl-9 text-lg font-semibold tabular-nums"
-                value={budgetValue}
-                onChange={(event) => setBudgetDraft(event.target.value)}
-              />
-            </div>
-          </div>
-
-          <Button
-            className="w-full"
-            onClick={handleBudgetSave}
-            disabled={isBusy === "budget"}
-          >
-            {isBusy === "budget" ? "保存中..." : "保存预算规则"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle>奶茶额度与奖励</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-3 text-sm">
-            <div className="app-stat">
-              <p className="text-text-muted">默认杯数</p>
-              <p className="mt-1 font-semibold tabular-nums">
-                {snapshot?.settings.defaultMilkTeaCups ?? "--"}
-              </p>
-            </div>
-            <div className="app-stat">
-              <p className="text-text-muted">本月已喝</p>
-              <p className="mt-1 font-semibold tabular-nums">
-                {snapshot?.currentQuota.usedCups ?? "--"}
-              </p>
-            </div>
-            <div className="app-stat">
-              <p className="text-text-muted">奖励杯数</p>
-              <p className="mt-1 font-semibold tabular-nums">
-                {snapshot?.currentQuota.bonusCups ?? "--"}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground" htmlFor="cups-input">
-              默认总杯数
-            </label>
-            <Input
-              id="cups-input"
-              inputMode="numeric"
-              value={cupsValue}
-              onChange={(event) => setCupsDraft(event.target.value)}
-            />
-          </div>
-
-          <Button className="w-full" onClick={handleMilkTeaSave} disabled={isBusy === "cups"}>
-            {isBusy === "cups" ? "保存中..." : "保存默认杯数"}
-          </Button>
-
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <Input
-              inputMode="numeric"
-              value={rewardDraft}
-              onChange={(event) => setRewardDraft(event.target.value)}
-            />
-            <Button
-              variant="outline"
-              onClick={handleManualReward}
-              disabled={isBusy === "reward"}
-            >
-              {isBusy === "reward" ? "处理中..." : "手动加杯"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle>主题与动效</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">主题模式</p>
-            <div className="grid grid-cols-3 gap-3">
-              {([
-                ["system", "跟随系统"],
-                ["light", "浅色"],
-                ["dark", "深色"],
-              ] as const).map(([value, label]) => (
-                <Button
-                  key={value}
-                  variant={selectedTheme === value ? "default" : "outline"}
-                  onClick={() => handleThemeChange(value)}
-                  disabled={isBusy === `theme-${value}`}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">动效等级</p>
-            <div className="grid grid-cols-2 gap-3">
-              {([
-                ["full", "完整"],
-                ["reduced", "降低"],
-              ] as const).map(([value, label]) => (
-                <Button
-                  key={value}
-                  variant={selectedMotion === value ? "secondary" : "outline"}
-                  onClick={() => handleMotionChange(value)}
-                  disabled={isBusy === `motion-${value}`}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-1">
-            <CardTitle>数据备份</CardTitle>
-            <InfoTip
-              text="导出会生成完整 JSON 备份；导入会覆盖当前本地数据。"
-              label="查看数据备份说明"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">动效等级</p>
           <div className="grid grid-cols-2 gap-3">
-            <Button onClick={handleExport} disabled={isBusy === "export"}>
-              {isBusy === "export" ? "导出中..." : "导出 JSON"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isBusy === "import"}
-            >
-              {isBusy === "import" ? "导入中..." : "导入 JSON"}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) {
-                  void handleImportFile(file);
-                }
-                event.target.value = "";
-              }}
-            />
+            {([
+              ["full", "完整"],
+              ["reduced", "降低"],
+            ] as const).map(([value, label]) => (
+              <Button
+                key={value}
+                variant={selectedMotion === value ? "secondary" : "outline"}
+                onClick={() => handleMotionChange(value)}
+                disabled={isBusy === `motion-${value}`}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleCard>
 
-      <Card className="border-danger/30">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-1">
-            <CardTitle>危险操作</CardTitle>
-            <InfoTip
-              text="清空后会删除当前浏览器里的账本、预算、奶茶额度和设置数据，不会自动恢复。"
-              label="查看危险操作说明"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {confirmingClear ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setConfirmingClear(false)}
-                disabled={isBusy === "clear"}
-              >
-                取消
-              </Button>
-              <Button
-                variant="outline"
-                className="border-danger/30 text-danger hover:bg-danger/8"
-                onClick={handleClearData}
-                disabled={isBusy === "clear"}
-              >
-                {isBusy === "clear" ? "清空中..." : "确认清空"}
-              </Button>
-            </div>
-          ) : (
+      <CollapsibleCard
+        eyebrow="备份"
+        title="数据备份"
+        tipText="导出会生成完整 JSON 备份；导入会覆盖当前本地数据。"
+        summary="导出 JSON / 导入 JSON"
+        accentClassName="border-accent/55"
+        className="bg-accent/[0.05]"
+        summaryClassName="border-accent/15 bg-accent/[0.08] text-foreground"
+      >
+        <div className="grid grid-cols-2 gap-3">
+          <Button onClick={handleExport} disabled={isBusy === "export"}>
+            {isBusy === "export" ? "导出中..." : "导出 JSON"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBusy === "import"}
+          >
+            {isBusy === "import" ? "导入中..." : "导入 JSON"}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) {
+                void handleImportFile(file);
+              }
+              event.target.value = "";
+            }}
+          />
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        eyebrow="危险操作"
+        title="清空本地数据"
+        tipText="清空后会删除当前浏览器里的账本、预算、奶茶额度和设置数据，不会自动恢复。"
+        summary="删除本机当前浏览器里的全部业务数据"
+        accentClassName="border-danger/55"
+        className="border-danger/30 bg-danger/[0.04]"
+        summaryClassName="border-danger/15 bg-danger/[0.07] text-foreground"
+      >
+        {confirmingClear ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmingClear(false)}
+              disabled={isBusy === "clear"}
+            >
+              取消
+            </Button>
             <Button
               variant="outline"
-              className="w-full border-danger/30 text-danger hover:bg-danger/8"
-              onClick={() => setConfirmingClear(true)}
+              className="border-danger/30 text-danger hover:bg-danger/8"
+              onClick={handleClearData}
+              disabled={isBusy === "clear"}
             >
-              清空本地数据
+              {isBusy === "clear" ? "清空中..." : "确认清空"}
             </Button>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full border-danger/30 text-danger hover:bg-danger/8"
+            onClick={() => setConfirmingClear(true)}
+          >
+            清空本地数据
+          </Button>
+        )}
+      </CollapsibleCard>
     </AppShell>
   );
 }

@@ -21,6 +21,7 @@ import { AppShell } from "@/components/common/app-shell";
 import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { InfoTip } from "@/components/ui/info-tip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -42,13 +43,17 @@ function EntriesPanel({
   const { entries, isLoading } = useMonthEntries(monthKey);
   const filteredEntries = (entries ?? []).filter((entry) => entry.category === category);
   const total = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const panelTone =
+    category === "essential"
+      ? "border-essential/55 bg-essential/[0.05]"
+      : "border-fun/55 bg-fun/[0.05]";
 
   if (isLoading) {
     return <Card className="h-44 animate-pulse bg-surface-strong" />;
   }
 
   return (
-    <Card>
+    <Card className={panelTone}>
       <CardHeader className="pb-2">
         <p className="app-eyebrow">
           {CATEGORY_META[category].emoji} {CATEGORY_META[category].label}
@@ -140,7 +145,7 @@ export function LedgerPageView() {
   return (
     <>
       <AppShell>
-        <section className="surface-card rounded-xl p-4">
+        <section className="surface-card rounded-xl border border-primary/45 bg-primary/[0.06] p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-1">
@@ -151,13 +156,13 @@ export function LedgerPageView() {
                 />
               </div>
               <h1 className="text-[1.85rem] font-semibold tracking-tight">账本</h1>
-              <p className="text-sm leading-6 text-text-muted">
+              <div className="rounded-md border border-primary/20 bg-primary/12 px-3 py-2 text-sm leading-6 text-text-muted">
                 当前查看 {getMonthLabel(getMonthDate(currentMonthKey))}，本月总支出{" "}
                 <span className="font-semibold text-foreground">
                   {formatCurrency(monthTotal)}
                 </span>
                 。
-              </p>
+              </div>
             </div>
             <Button onClick={() => openQuickEntry()}>新增</Button>
           </div>
@@ -167,11 +172,20 @@ export function LedgerPageView() {
           <div className="app-feedback text-sm text-text-muted">{feedback}</div>
         ) : null}
 
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle>按月查看</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <CollapsibleCard
+          eyebrow="月份与筛选"
+          title="切换月份"
+          tipText="默认只看当前月份，需要翻历史时再展开，不让筛选块长期占满页面。"
+          summary={
+            <span className="tabular-nums">
+              {getMonthLabel(getMonthDate(currentMonthKey))} · {formatCurrency(monthTotal)}
+            </span>
+          }
+          accentClassName="border-accent/55"
+          className="bg-accent/[0.05]"
+          summaryClassName="border-accent/15 bg-accent/[0.08] text-foreground"
+        >
+          <div className="space-y-4">
             <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
               <Button
                 variant="outline"
@@ -209,15 +223,21 @@ export function LedgerPageView() {
                 </button>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CollapsibleCard>
 
         <Tabs value={tabValue} onValueChange={(value) => setTabValue(value as CategoryType)}>
           <TabsList className="w-full">
-            <TabsTrigger value="essential" className="flex-1">
+            <TabsTrigger
+              value="essential"
+              className="flex-1 data-[state=active]:bg-essential/12 data-[state=active]:text-essential"
+            >
               🥬 生活必需
             </TabsTrigger>
-            <TabsTrigger value="fun" className="flex-1">
+            <TabsTrigger
+              value="fun"
+              className="flex-1 data-[state=active]:bg-fun/12 data-[state=active]:text-fun"
+            >
               💸 娱乐
             </TabsTrigger>
           </TabsList>

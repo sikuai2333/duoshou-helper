@@ -4,8 +4,7 @@ import { useState, useTransition } from "react";
 import { appRepository } from "@/db/repositories/app-repository";
 import { formatCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InfoTip } from "@/components/ui/info-tip";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import type { DashboardSnapshot } from "@/types/domain";
 
 interface MilkTeaCardProps {
@@ -37,52 +36,48 @@ export function MilkTeaCard({ snapshot }: MilkTeaCardProps) {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-1">
-          <p className="app-eyebrow">☕ 奶茶额度</p>
-          <InfoTip
-            text="默认杯数、已喝和奖励杯数都会写入本地数据库，适合拿来做情绪消费的软上限。"
-            label="查看奶茶额度说明"
-          />
+    <CollapsibleCard
+      eyebrow="☕ 奶茶额度"
+      title="奶茶额度"
+      tipText="默认杯数、已喝和奖励杯数都会写入本地数据库，适合拿来做情绪消费的软上限。"
+      summary={
+        <span className="tabular-nums">
+          剩余 {remainingCups} 杯 · 已喝 {snapshot.milkTeaQuota.usedCups} 杯
+        </span>
+      }
+      accentClassName="border-fun/55"
+      className="bg-fun/[0.05]"
+      summaryClassName="border-fun/15 bg-fun/[0.08] text-foreground"
+    >
+      <div className="grid grid-cols-3 gap-3 text-sm">
+        <div className="app-stat border-fun/20 bg-fun/[0.1]">
+          <p className="text-text-muted">总杯数</p>
+          <p className="mt-1 font-semibold tabular-nums">{snapshot.milkTeaQuota.totalCups}</p>
         </div>
-        <CardTitle>奶茶额度</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="app-stat">
-            <p className="text-text-muted">总杯数</p>
-            <p className="mt-1 font-semibold tabular-nums">{snapshot.milkTeaQuota.totalCups}</p>
-          </div>
-          <div className="app-stat">
-            <p className="text-text-muted">已使用</p>
-            <p className="mt-1 font-semibold tabular-nums">{snapshot.milkTeaQuota.usedCups}</p>
-          </div>
-          <div className="app-stat">
-            <p className="text-text-muted">剩余</p>
-            <p className="mt-1 font-semibold tabular-nums">{remainingCups}</p>
-          </div>
+        <div className="app-stat border-secondary/20 bg-secondary/[0.1]">
+          <p className="text-text-muted">已使用</p>
+          <p className="mt-1 font-semibold tabular-nums">{snapshot.milkTeaQuota.usedCups}</p>
         </div>
-        <div className="text-sm text-text-muted">
-          当前剩余额度{" "}
-          <span className="font-semibold text-foreground">
-            {formatCurrency(snapshot.remainingBudget)}
-          </span>
+        <div className="app-stat border-accent/20 bg-accent/[0.1]">
+          <p className="text-text-muted">剩余</p>
+          <p className="mt-1 font-semibold tabular-nums">{remainingCups}</p>
         </div>
-        {feedback ? (
-          <div className="app-feedback text-sm text-text-muted">
-            {feedback}
-          </div>
-        ) : null}
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={handleDrink} disabled={isPending || remainingCups <= 0}>
-            喝一杯
-          </Button>
-          <Button variant="outline" onClick={handleBonus} disabled={isPending}>
-            🚴 +1 奖励
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="text-sm text-text-muted">
+        当前剩余额度{" "}
+        <span className="font-semibold text-foreground">
+          {formatCurrency(snapshot.remainingBudget)}
+        </span>
+      </div>
+      {feedback ? <div className="app-feedback border-fun/25 text-sm text-text-muted">{feedback}</div> : null}
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="fun" onClick={handleDrink} disabled={isPending || remainingCups <= 0}>
+          喝一杯
+        </Button>
+        <Button variant="outline" onClick={handleBonus} disabled={isPending}>
+          🚴 +1 奖励
+        </Button>
+      </div>
+    </CollapsibleCard>
   );
 }

@@ -27,9 +27,13 @@ export default function RootLayout({
     <html lang="zh-CN" className={`${ibmPlexSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>
-          <div className="relative flex min-h-screen flex-col bg-background">
-            {children}
-            <BottomNavigation />
+          <div className="app-stage">
+            <div className="app-device-shell">
+              <div className="app-device-screen">
+                {children}
+                <BottomNavigation />
+              </div>
+            </div>
           </div>
         </AppProviders>
       </body>

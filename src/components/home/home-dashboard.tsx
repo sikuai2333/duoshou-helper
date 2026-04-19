@@ -36,7 +36,7 @@ export function HomeDashboard() {
   return (
     <>
       <AppShell>
-        <section className="surface-card rounded-xl p-4">
+        <section className="surface-card rounded-xl border border-primary/45 bg-primary/[0.06] p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-1">
@@ -54,7 +54,7 @@ export function HomeDashboard() {
                 {snapshot?.totalEntries ? "本月概览" : "开始记账"}
               </h1>
             </div>
-            <div className="min-w-24 border-l border-border-soft pl-4 text-right">
+            <div className="min-w-24 rounded-lg border border-primary/20 bg-primary/12 px-3 py-2 text-right">
               <p className="text-xs text-text-muted">当前月份</p>
               <p className="mt-1 text-base font-semibold tabular-nums">
                 {getMonthLabel(getMonthDate(currentMonthKey))}
