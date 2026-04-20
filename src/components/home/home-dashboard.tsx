@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { AppShell } from "@/components/common/app-shell";
-import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { getMonthDate, getMonthLabel } from "@/lib/date";
 import { useAppStore } from "@/stores/app-store";
@@ -92,7 +91,6 @@ export function HomeDashboard() {
           </>
         )}
       </AppShell>
-      <QuickEntryDrawer />
     </>
   );
 }

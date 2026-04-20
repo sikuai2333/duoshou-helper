@@ -18,7 +18,6 @@ import { useAppStore } from "@/stores/app-store";
 import { useUiStore } from "@/stores/ui-store";
 import type { CategoryType } from "@/types/domain";
 import { AppShell } from "@/components/common/app-shell";
-import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
@@ -261,7 +260,6 @@ export function LedgerPageView() {
           </TabsContent>
         </Tabs>
       </AppShell>
-      <QuickEntryDrawer />
     </>
   );
 }

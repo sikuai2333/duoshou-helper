@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { AppProviders } from "@/components/common/app-providers";
 import { FloatingActionMenu } from "@/components/navigation/floating-action-menu";
+import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
                 <div className="app-scroll-region">{children}</div>
                 <div id="app-overlay-root" className="app-overlay-root" />
                 <FloatingActionMenu />
+                <QuickEntryDrawer />
                 <BottomNavigation />
               </div>
             </div>
