@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
 import { AppProviders } from "@/components/common/app-providers";
-import { FloatingActionMenu } from "@/components/navigation/floating-action-menu";
 import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
-
-const ibmPlexSans = IBM_Plex_Sans({
-  variable: "--font-ibm-plex-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -26,18 +18,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className={`${ibmPlexSans.variable} h-full antialiased`}>
+    <html lang="zh-CN" className="h-full antialiased">
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>
           <div className="app-stage">
-            <div className="app-device-shell">
-              <div id="app-device-screen" className="app-device-screen">
-                <div className="app-scroll-region">{children}</div>
-                <div id="app-overlay-root" className="app-overlay-root" />
-                <FloatingActionMenu />
-                <QuickEntryDrawer />
-                <BottomNavigation />
-              </div>
+            <div id="app-device-screen" className="app-device-screen">
+              <div className="app-scroll-region">{children}</div>
+              <div id="app-overlay-root" className="app-overlay-root" />
+              <QuickEntryDrawer />
+              <BottomNavigation />
             </div>
           </div>
         </AppProviders>
