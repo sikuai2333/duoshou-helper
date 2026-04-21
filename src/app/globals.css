@@ -1,20 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f1ea;
-  --foreground: #2d2926;
-  --surface: #fffdfa;
-  --surface-strong: #f8f3ed;
-  --primary: #a45a2a;
-  --primary-strong: #8e4c21;
-  --accent: #5d7a62;
-  --secondary: #c49f42;
-  --essential: #5c8158;
-  --fun: #ab5f74;
-  --border-soft: #d7cec1;
-  --text-muted: #746a60;
-  --danger: #b4524d;
-  --shadow-card: 0 2px 8px rgba(45, 41, 38, 0.06);
+  --background: #f5f5f4;
+  --foreground: #1c1917;
+  --surface: #fafaf9;
+  --surface-strong: #f0eeeb;
+  --primary: #0891b2;
+  --primary-strong: #0e7490;
+  --accent: #06b6d4;
+  --secondary: #f59e0b;
+  --essential: #0f766e;
+  --fun: #c2410c;
+  --border-soft: #ddd6ce;
+  --text-muted: #78716c;
+  --danger: #b91c1c;
   --font-body:
     -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", system-ui, sans-serif;
@@ -43,9 +42,6 @@
 
 html {
   background: var(--background);
-  scroll-behavior: smooth;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 html[data-theme="light"] {
@@ -54,44 +50,32 @@ html[data-theme="light"] {
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --background: #1a1918;
-  --foreground: #f1ece6;
-  --surface: #23211f;
-  --surface-strong: #1f1d1c;
-  --primary: #cb8b5a;
-  --primary-strong: #dc9a68;
-  --accent: #7ea98a;
-  --secondary: #d8b560;
-  --essential: #86b27f;
-  --fun: #cf8598;
-  --border-soft: #37322e;
-  --text-muted: #b3a79b;
-  --danger: #d57c78;
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --background: #0f0f0f;
+  --foreground: #f5f5f5;
+  --surface: #1a1a1a;
+  --surface-strong: #242424;
+  --primary: #00d4aa;
+  --primary-strong: #00b893;
+  --accent: #00a3cc;
+  --secondary: #eab308;
+  --essential: #22c55e;
+  --fun: #ff6b9d;
+  --border-soft: #2f2f2f;
+  --text-muted: #b0b0b0;
+  --danger: #f87171;
 }
 
 body {
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 10rem),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 ::selection {
-  background: rgba(164, 90, 42, 0.2);
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 @layer base {
@@ -113,22 +97,17 @@ body::-webkit-scrollbar {
 }
 
 @layer utilities {
-  .app-stage {
-    min-height: 100dvh;
-  }
-
-  .app-device-shell {
+  .app-stage,
+  .app-device-shell,
+  .app-device-screen {
     min-height: 100dvh;
   }
 
   .app-device-screen {
     position: relative;
-    min-height: 100dvh;
     height: 100dvh;
     overflow: hidden;
     background: var(--background);
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 
   .app-scroll-region {
@@ -136,16 +115,11 @@ body::-webkit-scrollbar {
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 
   .app-overlay-root {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     overflow: hidden;
     z-index: 70;
     pointer-events: none;
@@ -155,80 +129,28 @@ body::-webkit-scrollbar {
     width: min(100%, 34rem);
     margin-inline: auto;
     padding-inline: 1rem;
-    padding-top: 1.25rem;
-    padding-bottom: calc(9rem + env(safe-area-inset-bottom));
+    padding-top: 1rem;
+    padding-bottom: calc(6.75rem + env(safe-area-inset-bottom));
   }
 
   .surface-card {
     background: var(--surface);
     border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-card);
+    border-radius: 0.75rem;
   }
 
   .surface-card-strong {
     background: var(--surface-strong);
     border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-card);
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .app-eyebrow {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-  }
-
-  .app-stat {
     border-radius: 0.75rem;
-    border: 1px solid var(--border-soft);
-    background: color-mix(in srgb, var(--surface) 92%, var(--background));
-    padding: 0.875rem;
-  }
-
-  .app-feedback {
-    border-left: 3px solid var(--border-soft);
-    background: color-mix(in srgb, var(--surface) 94%, var(--background));
-    padding: 0.875rem 1rem;
   }
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
-
-  .app-device-screen::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
-
-  .app-scroll-region::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
-
-  .app-device-screen::-webkit-scrollbar-thumb,
-  .app-device-screen::-webkit-scrollbar-track,
-  .app-device-screen::-webkit-scrollbar-corner,
-  .app-scroll-region::-webkit-scrollbar-thumb,
-  .app-scroll-region::-webkit-scrollbar-track,
-  .app-scroll-region::-webkit-scrollbar-corner {
-    background: transparent;
-  }
 }
 
 @media (min-width: 1024px) {
-  body {
-    background:
-      radial-gradient(circle at top, rgba(187, 93, 47, 0.08), transparent 22rem),
-      radial-gradient(circle at bottom right, rgba(93, 122, 98, 0.08), transparent 20rem),
-      linear-gradient(180deg, #ece4d9 0%, #e5ddd3 100%);
-  }
-
   .app-stage {
     display: flex;
     min-height: 100dvh;
@@ -238,58 +160,10 @@ body::-webkit-scrollbar {
   }
 
   .app-device-shell {
-    position: relative;
-    width: min(26.5rem, calc((100dvh - 3rem) * 0.462));
-    min-height: 0;
-    max-width: calc(100vw - 3rem);
-    padding: 0.75rem;
+    width: min(100%, 28rem);
+    border: 1px solid var(--border-soft);
+    border-radius: 0.75rem;
     overflow: hidden;
-    border-radius: 2.4rem;
-    background: #1d1a17;
-    box-shadow:
-      0 20px 60px rgba(34, 29, 25, 0.2),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  }
-
-  .app-device-shell::before {
-    position: absolute;
-    left: 50%;
-    top: 0.56rem;
-    width: 0.88rem;
-    height: 0.88rem;
-    transform: translateX(-50%);
-    border-radius: 999px;
-    background:
-      radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.18), transparent 32%),
-      radial-gradient(circle at 55% 58%, #231d1a 0%, #14110f 62%, #090807 100%);
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.06),
-      0 1px 2px rgba(0, 0, 0, 0.3);
-    content: "";
-    z-index: 2;
-  }
-
-  .app-device-screen {
-    position: relative;
-    width: 100%;
-    min-height: 0;
-    height: auto;
-    max-height: calc(100dvh - 3rem);
-    aspect-ratio: 430 / 932;
-    overflow: hidden;
-    border-radius: 1.6rem;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 10rem),
-      var(--background);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-  }
-
-  .app-scroll-region {
-    height: 100%;
-  }
-
-  .app-container {
-    width: 100%;
-    max-width: 26.5rem;
+    background: var(--surface);
   }
 }

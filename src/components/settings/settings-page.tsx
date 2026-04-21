@@ -2,53 +2,29 @@
 
 import { useEffect, useRef, useState } from "react";
 import { z, ZodError } from "zod";
-import { useAppStore } from "@/stores/app-store";
-import { appRepository } from "@/db/repositories/app-repository";
-import { downloadExportPayload, parseImportPayload } from "@/lib/export-import";
-import { useSettingsData } from "@/hooks/use-settings-data";
-import type { BudgetMode, MotionLevel, ThemeMode } from "@/types/domain";
 import { AppShell } from "@/components/common/app-shell";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { InfoTip } from "@/components/ui/info-tip";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-
-const budgetSchema = z.coerce
-  .number()
-  .finite("预算必须是数字")
-  .positive("预算要大于 0")
-  .max(999999, "预算先控制在六位数以内");
-
-const cupsSchema = z.coerce
-  .number()
-  .int("杯数要填整数")
-  .positive("杯数至少要 1")
-  .max(99, "杯数先控制在 99 以内");
-
-const rewardSchema = z.coerce
-  .number()
-  .int("奖励杯数要填整数")
-  .positive("奖励杯数至少要 1")
-  .max(20, "单次奖励先控制在 20 杯以内");
+import { appRepository } from "@/db/repositories/app-repository";
+import { useSettingsData } from "@/hooks/use-settings-data";
+import { downloadExportPayload, parseImportPayload } from "@/lib/export-import";
+import { useAppStore } from "@/stores/app-store";
+import type { BudgetMode, MotionLevel, ThemeMode } from "@/types/domain";
 
 function resolveErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "导入内容格式不正确";
+    return error.issues[0]?.message ?? "输入不合法";
   }
-
   if (error instanceof Error) {
     return error.message;
   }
-
-  return "操作失败，请稍后再试";
+  return "操作失败";
 }
 
 export function SettingsPageView() {
   const currentMonthKey = useAppStore((state) => state.currentMonthKey);
-  const { snapshot, isLoading } = useSettingsData(currentMonthKey);
+  const { snapshot } = useSettingsData(currentMonthKey);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [budgetDraft, setBudgetDraft] = useState("");
   const [modeDraft, setModeDraft] = useState<BudgetMode | null>(null);
@@ -72,6 +48,7 @@ export function SettingsPageView() {
     setIsBusy(actionKey);
     setToast(null);
 
+  const runAction = async (task: () => Promise<void>, successText: string) => {
     try {
       await task();
       setToast({
@@ -148,36 +125,21 @@ export function SettingsPageView() {
 
   const handleMotionChange = async (motionLevel: MotionLevel) => {
     await runAction(
-      `motion-${motionLevel}`,
-      () => appRepository.updateAppearance({ motionLevel }),
-      "动效等级已经保存。",
+      () => appRepository.updateBudgetConfig({ monthKey: currentMonthKey, budget: value, mode }),
+      "预算已保存",
     );
   };
 
-  const handleExport = async () => {
+  const saveCups = async () => {
+    const value = cupsSchema.parse(cups || snapshot?.settings.defaultMilkTeaCups || "");
     await runAction(
-      "export",
-      async () => {
-        const payload = await appRepository.exportData();
-        downloadExportPayload(payload);
-      },
-      "备份文件已经导出到浏览器下载列表。",
+      () => appRepository.updateDefaultMilkTeaCups({ monthKey: currentMonthKey, totalCups: value }),
+      "奶茶默认杯数已保存",
     );
   };
 
-  const handleImportFile = async (file: File) => {
-    if (!window.confirm("导入会覆盖当前本地数据，确定继续吗？")) {
-      return;
-    }
-
-    await runAction(
-      "import",
-      async () => {
-        const payload = parseImportPayload(await file.text());
-        await appRepository.importData(payload, currentMonthKey);
-      },
-      "数据导入完成，当前页面已经切换到新的本地数据。",
-    );
+  const updateTheme = async (themeMode: ThemeMode) => {
+    await runAction(() => appRepository.updateAppearance({ themeMode }), "主题设置已更新");
   };
 
 
@@ -353,157 +315,101 @@ export function SettingsPageView() {
               {snapshot?.currentQuota.bonusCups ?? "--"}
             </p>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground" htmlFor="cups-input">
-            默认总杯数
-          </label>
           <Input
-            id="cups-input"
-            inputMode="numeric"
-            value={cupsValue}
-            onChange={(event) => setCupsDraft(event.target.value)}
+            inputMode="decimal"
+            value={budget || String(snapshot?.currentBudget.budget ?? "")}
+            onChange={(event) => setBudget(event.target.value)}
+            placeholder="本月预算"
+            className="tabular-nums"
           />
-        </div>
-
-        <Button className="w-full" onClick={handleMilkTeaSave} disabled={isBusy === "cups"}>
-          {isBusy === "cups" ? "保存中..." : "保存默认杯数"}
-        </Button>
-
-        <div className="grid grid-cols-[1fr_auto] gap-3">
-          <Input
-            inputMode="numeric"
-            value={rewardDraft}
-            onChange={(event) => setRewardDraft(event.target.value)}
-          />
-          <Button variant="outline" onClick={handleManualReward} disabled={isBusy === "reward"}>
-            {isBusy === "reward" ? "处理中..." : "手动加杯"}
+          <Button variant="outline" onClick={() => void saveBudget()}>
+            保存预算
           </Button>
         </div>
-      </CollapsibleCard>
 
-      <CollapsibleCard
-        eyebrow="外观"
-        title="主题与动效"
-        summary={`${selectedTheme === "system" ? "跟随系统" : selectedTheme === "light" ? "浅色" : "深色"} · ${selectedMotion === "full" ? "完整动效" : "降低动效"}`}
-        accentClassName="border-secondary/55"
-        className="bg-secondary/[0.05]"
-        summaryClassName="border-secondary/15 bg-secondary/[0.08] text-foreground"
-      >
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">主题模式</p>
-          <div className="grid grid-cols-3 gap-3">
-            {([
-              ["system", "跟随系统"],
-              ["light", "浅色"],
-              ["dark", "深色"],
-            ] as const).map(([value, label]) => (
-              <Button
-                key={value}
-                variant={selectedTheme === value ? "default" : "outline"}
-                onClick={() => handleThemeChange(value)}
-                disabled={isBusy === `theme-${value}`}
-              >
-                {label}
-              </Button>
-            ))}
+        <div className="space-y-3 p-4">
+          <p className="text-sm font-medium">奶茶杯数</p>
+          <Input
+            inputMode="numeric"
+            value={cups || String(snapshot?.settings.defaultMilkTeaCups ?? "")}
+            onChange={(event) => setCups(event.target.value)}
+            placeholder="默认杯数"
+            className="tabular-nums"
+          />
+          <Button variant="outline" onClick={() => void saveCups()}>
+            保存杯数
+          </Button>
+        </div>
+
+        <div className="space-y-3 p-4">
+          <p className="text-sm font-medium">外观</p>
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" onClick={() => void updateTheme("system")}>系统</Button>
+            <Button variant="outline" onClick={() => void updateTheme("light")}>浅色</Button>
+            <Button variant="outline" onClick={() => void updateTheme("dark")}>深色</Button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={() => void updateMotion("full")}>完整动效</Button>
+            <Button variant="outline" onClick={() => void updateMotion("reduced")}>降低动效</Button>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">动效等级</p>
-          <div className="grid grid-cols-2 gap-3">
-            {([
-              ["full", "完整"],
-              ["reduced", "降低"],
-            ] as const).map(([value, label]) => (
-              <Button
-                key={value}
-                variant={selectedMotion === value ? "secondary" : "outline"}
-                onClick={() => handleMotionChange(value)}
-                disabled={isBusy === `motion-${value}`}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard
-        eyebrow="备份"
-        title="数据备份"
-        tipText="导出会生成完整 JSON 备份；导入会覆盖当前本地数据。"
-        summary="导出 JSON / 导入 JSON"
-        accentClassName="border-accent/55"
-        className="bg-accent/[0.05]"
-        summaryClassName="border-accent/15 bg-accent/[0.08] text-foreground"
-      >
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={handleExport} disabled={isBusy === "export"}>
-            {isBusy === "export" ? "导出中..." : "导出 JSON"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isBusy === "import"}
-          >
-            {isBusy === "import" ? "导入中..." : "导入 JSON"}
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json"
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) {
-                void handleImportFile(file);
-              }
-              event.target.value = "";
-            }}
-          />
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard
-        eyebrow="危险操作"
-        title="清空本地数据"
-        tipText="清空后会删除当前浏览器里的账本、预算、奶茶额度和设置数据，不会自动恢复。"
-        summary="删除本机当前浏览器里的全部业务数据"
-        accentClassName="border-danger/55"
-        className="border-danger/30 bg-danger/[0.04]"
-        summaryClassName="border-danger/15 bg-danger/[0.07] text-foreground"
-      >
-        {confirmingClear ? (
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setConfirmingClear(false)}
-              disabled={isBusy === "clear"}
-            >
-              取消
-            </Button>
+        <div className="space-y-3 p-4">
+          <p className="text-sm font-medium">数据管理</p>
+          <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
-              className="border-danger/30 text-danger hover:bg-danger/8"
-              onClick={handleClearData}
-              disabled={isBusy === "clear"}
+              onClick={() =>
+                void runAction(async () => {
+                  const payload = await appRepository.exportData();
+                  downloadExportPayload(payload);
+                }, "已导出 JSON")
+              }
             >
-              {isBusy === "clear" ? "清空中..." : "确认清空"}
+              导出 JSON
             </Button>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              导入 JSON
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+
+                void runAction(async () => {
+                  if (!window.confirm("导入会覆盖当前数据，确认继续？")) {
+                    return;
+                  }
+                  const payload = parseImportPayload(await file.text());
+                  await appRepository.importData(payload, currentMonthKey);
+                }, "导入完成");
+
+                event.target.value = "";
+              }}
+            />
           </div>
-        ) : (
           <Button
             variant="outline"
-            className="w-full border-danger/30 text-danger hover:bg-danger/8"
-            onClick={() => setConfirmingClear(true)}
+            className="w-full border-danger text-danger"
+            onClick={() =>
+              void runAction(async () => {
+                if (!window.confirm("确认清空本地数据？")) {
+                  return;
+                }
+                await appRepository.clearAllData(currentMonthKey);
+              }, "本地数据已清空")
+            }
           >
             清空本地数据
           </Button>
-        )}
-      </CollapsibleCard>
+        </div>
+      </section>
     </AppShell>
   );
 }
