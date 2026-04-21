@@ -115,6 +115,12 @@ body {
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .app-scroll-region::-webkit-scrollbar {
+    display: none;
   }
 
   .app-overlay-root {
@@ -161,9 +167,16 @@ body {
 
   .app-device-shell {
     width: min(100%, 28rem);
+    min-height: auto;
+    height: min(calc(100dvh - 3rem), 52rem);
     border: 1px solid var(--border-soft);
     border-radius: 0.75rem;
     overflow: hidden;
     background: var(--surface);
+  }
+
+  .app-device-screen {
+    min-height: auto;
+    height: 100%;
   }
 }
