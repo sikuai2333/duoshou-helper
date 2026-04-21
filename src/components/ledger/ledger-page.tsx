@@ -2,264 +2,190 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { PencilLine, Trash2 } from "lucide-react";
+import { Search } from "lucide-react";
+import { AppShell } from "@/components/common/app-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CATEGORY_META } from "@/constants/app";
 import { ledgerRepository } from "@/db/repositories/ledger-repository";
-import { formatCurrency } from "@/lib/currency";
-import {
-  getFriendlyDate,
-  getMonthDate,
-  getMonthLabel,
-  listRecentMonthKeys,
-  shiftMonthKey,
-} from "@/lib/date";
 import { useMonthEntries } from "@/hooks/use-month-entries";
+import { formatCurrency } from "@/lib/currency";
+import { getMonthDate, getMonthLabel, listRecentMonthKeys } from "@/lib/date";
 import { useAppStore } from "@/stores/app-store";
 import { useUiStore } from "@/stores/ui-store";
 import type { CategoryType } from "@/types/domain";
-import { AppShell } from "@/components/common/app-shell";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { InfoTip } from "@/components/ui/info-tip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface EntriesPanelProps {
-  monthKey: string;
-  category: CategoryType;
-  onEdit: (entryId: string) => void;
-  onDelete: (entryId: string) => void;
-  isDeleting: boolean;
-}
+type FilterCategory = "all" | CategoryType;
 
-function EntriesPanel({
-  monthKey,
-  category,
-  onEdit,
-  onDelete,
-  isDeleting,
-}: EntriesPanelProps) {
-  const { entries, isLoading } = useMonthEntries(monthKey);
-  const filteredEntries = (entries ?? []).filter((entry) => entry.category === category);
-  const total = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const panelTone =
-    category === "essential"
-      ? "border-essential/55 bg-essential/[0.05]"
-      : "border-fun/55 bg-fun/[0.05]";
-
-  if (isLoading) {
-    return <Card className="h-44 animate-pulse bg-surface-strong" />;
-  }
-
-  return (
-    <Card className={panelTone}>
-      <CardHeader className="pb-2">
-        <p className="app-eyebrow">
-          {CATEGORY_META[category].emoji} {CATEGORY_META[category].label}
-        </p>
-        <CardTitle>本月合计 {formatCurrency(total)}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {filteredEntries.length === 0 ? (
-          <div className="app-feedback text-sm text-text-muted">
-            这个分类还没有记录。你可以先记一笔，或者切到另一个月份看看。
-          </div>
-        ) : (
-          filteredEntries.map((entry) => (
-            <div
-              key={entry.id}
-              className="border-b border-border-soft pb-3 last:border-b-0 last:pb-0"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium">
-                    {entry.emoji} {CATEGORY_META[entry.category].label}
-                  </p>
-                  <p className="text-xs text-text-muted">{getFriendlyDate(entry.createdAt)}</p>
-                </div>
-                <p className="text-base font-semibold tabular-nums">
-                  {formatCurrency(entry.amount)}
-                </p>
-              </div>
-              <div className="mt-3 flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => onEdit(entry.id)}
-                >
-                  <PencilLine className="size-3.5" />
-                  编辑
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="flex-1 text-danger hover:bg-danger/8 hover:text-danger"
-                  onClick={() => onDelete(entry.id)}
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="size-3.5" />
-                  删除
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
-  );
+function dayKey(iso: string) {
+  return iso.slice(0, 10);
 }
 
 export function LedgerPageView() {
   const currentMonthKey = useAppStore((state) => state.currentMonthKey);
   const setCurrentMonthKey = useAppStore((state) => state.setCurrentMonthKey);
   const openQuickEntry = useUiStore((state) => state.openQuickEntry);
-  const [tabValue, setTabValue] = useState<CategoryType>("essential");
-  const [feedback, setFeedback] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [categoryFilter, setCategoryFilter] = useState<FilterCategory>("all");
+  const [keyword, setKeyword] = useState("");
+
   const availableMonths = useLiveQuery(() => ledgerRepository.listAvailableMonths(), []);
-  const { entries } = useMonthEntries(currentMonthKey);
-  const monthTotal = (entries ?? []).reduce((sum, entry) => sum + entry.amount, 0);
+  const { entries, isLoading } = useMonthEntries(currentMonthKey);
 
   const monthOptions = useMemo(() => {
     const recent = listRecentMonthKeys(currentMonthKey, 6);
     const merged = new Set<string>([currentMonthKey, ...recent, ...(availableMonths ?? [])]);
-
-    return [...merged].sort((left, right) => right.localeCompare(left));
+    return [...merged].sort((a, b) => b.localeCompare(a));
   }, [availableMonths, currentMonthKey]);
 
+  const filteredEntries = useMemo(() => {
+    const text = keyword.trim().toLowerCase();
+
+    return (entries ?? []).filter((entry) => {
+      const categoryMatch = categoryFilter === "all" || entry.category === categoryFilter;
+      const textMatch =
+        text.length === 0 ||
+        entry.emoji.toLowerCase().includes(text) ||
+        CATEGORY_META[entry.category].label.toLowerCase().includes(text);
+      return categoryMatch && textMatch;
+    });
+  }, [categoryFilter, entries, keyword]);
+
+  const groupedEntries = useMemo(() => {
+    return filteredEntries.reduce<Record<string, typeof filteredEntries>>((groups, entry) => {
+      const key = dayKey(entry.createdAt);
+      groups[key] = [...(groups[key] ?? []), entry];
+      return groups;
+    }, {});
+  }, [filteredEntries]);
+
+  const sortedGroupKeys = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
+
   const handleDelete = (entryId: string) => {
-    if (!window.confirm("删除后不会自动恢复，确定删掉这条记录吗？")) {
+    if (!window.confirm("删除后无法恢复，确定删除这条记录吗？")) {
       return;
     }
 
     startDeleteTransition(() => {
-      void ledgerRepository
-        .deleteEntry(entryId)
-        .then(() => setFeedback("这条记录已经删除，本月统计也同步更新了。"))
-        .catch(() => setFeedback("删除失败，请稍后再试。"));
+      void ledgerRepository.deleteEntry(entryId);
     });
   };
 
   return (
-    <>
-      <AppShell>
-        <section className="surface-card rounded-xl border border-primary/45 bg-primary/[0.06] p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1">
-                <p className="app-eyebrow">账本</p>
-                <InfoTip
-                  text="新增、编辑、删除、筛选和按月查看都集中在这一页，避免在多个页面之间来回跳。"
-                  label="查看账本说明"
-                />
-              </div>
-              <h1 className="text-[1.85rem] font-semibold tracking-tight">账本</h1>
-              <div className="rounded-md border border-primary/20 bg-primary/12 px-3 py-2 text-sm leading-6 text-text-muted">
-                当前查看 {getMonthLabel(getMonthDate(currentMonthKey))}，本月总支出{" "}
-                <span className="font-semibold text-foreground">
-                  {formatCurrency(monthTotal)}
-                </span>
-                。
-              </div>
-            </div>
-            <Button onClick={() => openQuickEntry()}>新增</Button>
-          </div>
-        </section>
+    <AppShell>
+      <header className="space-y-1">
+        <h1 className="text-xl font-semibold">账本</h1>
+        <p className="text-sm text-text-muted">按时间、分类筛选流水，点记录可直接编辑。</p>
+      </header>
 
-        {feedback ? (
-          <div className="app-feedback text-sm text-text-muted">{feedback}</div>
-        ) : null}
+      <section className="surface-card space-y-3 p-4">
+        <div className="grid grid-cols-2 gap-2">
+          {monthOptions.map((monthKey) => (
+            <button
+              key={monthKey}
+              type="button"
+              onClick={() => setCurrentMonthKey(monthKey)}
+              className={
+                monthKey === currentMonthKey
+                  ? "rounded-md border border-primary bg-surface px-3 py-2 text-sm text-primary"
+                  : "rounded-md border border-border-soft bg-surface px-3 py-2 text-sm text-text-muted"
+              }
+            >
+              {getMonthLabel(getMonthDate(monthKey))}
+            </button>
+          ))}
+        </div>
 
-        <CollapsibleCard
-          eyebrow="月份与筛选"
-          title="切换月份"
-          tipText="默认只看当前月份，需要翻历史时再展开，不让筛选块长期占满页面。"
-          summary={
-            <span className="tabular-nums">
-              {getMonthLabel(getMonthDate(currentMonthKey))} · {formatCurrency(monthTotal)}
-            </span>
-          }
-          accentClassName="border-accent/55"
-          className="bg-accent/[0.05]"
-          summaryClassName="border-accent/15 bg-accent/[0.08] text-foreground"
-        >
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            ["all", "全部"],
+            ["essential", "生活必需"],
+            ["fun", "娱乐"],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setCategoryFilter(value)}
+              className={
+                categoryFilter === value
+                  ? "rounded-md border border-primary bg-surface px-3 py-2 text-sm text-primary"
+                  : "rounded-md border border-border-soft bg-surface px-3 py-2 text-sm text-text-muted"
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+          <Input
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder="搜索分类或 emoji"
+            className="pl-9"
+          />
+        </div>
+      </section>
+
+      <Button variant="outline" onClick={() => openQuickEntry()}>
+        记一笔
+      </Button>
+
+      <section className="surface-card p-4">
+        {isLoading ? (
+          <p className="text-sm text-text-muted">正在读取流水...</p>
+        ) : sortedGroupKeys.length === 0 ? (
+          <p className="text-sm text-text-muted">这个筛选条件下暂无流水。</p>
+        ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentMonthKey(shiftMonthKey(currentMonthKey, -1))}
-              >
-                上个月
-              </Button>
-              <div className="rounded-md border border-border-soft bg-surface-strong px-4 py-3 text-center">
-                <p className="text-xs text-text-muted">当前月份</p>
-                <p className="mt-1 text-base font-semibold tabular-nums">
-                  {getMonthLabel(getMonthDate(currentMonthKey))}
-                </p>
+            {sortedGroupKeys.map((groupKey) => (
+              <div key={groupKey} className="space-y-1">
+                <h2 className="text-xs font-medium text-text-muted">{groupKey}</h2>
+                {groupedEntries[groupKey].map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-border-soft py-2 last:border-b-0"
+                  >
+                    <button
+                      type="button"
+                      className="text-xl"
+                      onClick={() => openQuickEntry(entry.id)}
+                      aria-label="编辑这条记录"
+                    >
+                      {entry.emoji}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-left"
+                      onClick={() => openQuickEntry(entry.id)}
+                    >
+                      <p className="text-sm font-medium">{CATEGORY_META[entry.category].label}</p>
+                      <p className="text-xs text-text-muted">
+                        {new Date(entry.createdAt).toLocaleTimeString("zh-CN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </button>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold tabular-nums">{formatCurrency(entry.amount)}</p>
+                      <button
+                        type="button"
+                        className="text-xs text-danger"
+                        onClick={() => handleDelete(entry.id)}
+                        disabled={isDeleting}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentMonthKey(shiftMonthKey(currentMonthKey, 1))}
-                disabled={currentMonthKey >= listRecentMonthKeys()[0]}
-              >
-                下个月
-              </Button>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {monthOptions.map((monthKey) => (
-                <button
-                  key={monthKey}
-                  type="button"
-                  onClick={() => setCurrentMonthKey(monthKey)}
-                  className={
-                    monthKey === currentMonthKey
-                      ? "rounded-md border border-primary bg-primary px-3 py-2 text-sm font-medium text-white"
-                      : "rounded-md border border-border-soft bg-surface px-3 py-2 text-sm text-text-muted"
-                  }
-                >
-                  {getMonthLabel(getMonthDate(monthKey))}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
-        </CollapsibleCard>
-
-        <Tabs value={tabValue} onValueChange={(value) => setTabValue(value as CategoryType)}>
-          <TabsList className="w-full">
-            <TabsTrigger
-              value="essential"
-              className="flex-1 data-[state=active]:bg-essential/12 data-[state=active]:text-essential"
-            >
-              🥬 生活必需
-            </TabsTrigger>
-            <TabsTrigger
-              value="fun"
-              className="flex-1 data-[state=active]:bg-fun/12 data-[state=active]:text-fun"
-            >
-              💸 娱乐
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="essential">
-            <EntriesPanel
-              monthKey={currentMonthKey}
-              category="essential"
-              onEdit={(entryId) => openQuickEntry(entryId)}
-              onDelete={handleDelete}
-              isDeleting={isDeleting}
-            />
-          </TabsContent>
-          <TabsContent value="fun">
-            <EntriesPanel
-              monthKey={currentMonthKey}
-              category="fun"
-              onEdit={(entryId) => openQuickEntry(entryId)}
-              onDelete={handleDelete}
-              isDeleting={isDeleting}
-            />
-          </TabsContent>
-        </Tabs>
-      </AppShell>
-    </>
+        )}
+      </section>
+    </AppShell>
   );
 }
