@@ -1,96 +1,88 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
 import { AppShell } from "@/components/common/app-shell";
+import { Button } from "@/components/ui/button";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { formatCurrency } from "@/lib/currency";
 import { getMonthDate, getMonthLabel } from "@/lib/date";
 import { useAppStore } from "@/stores/app-store";
 import { useUiStore } from "@/stores/ui-store";
-import { BudgetSummaryCard } from "@/components/home/budget-summary-card";
-import { CategorySplitCard } from "@/components/home/category-split-card";
-import { DecisionGlanceCard } from "@/components/home/decision-glance-card";
-import { MilkTeaCard } from "@/components/home/milk-tea-card";
-import { MonthProgressCard } from "@/components/home/month-progress-card";
-import { RecentEntriesCard } from "@/components/home/recent-entries-card";
-import { Card } from "@/components/ui/card";
-import { InfoTip } from "@/components/ui/info-tip";
-
-function LoadingCards() {
-  return (
-    <div className="space-y-4">
-      {[0, 1, 2].map((index) => (
-        <Card key={index} className="h-32 animate-pulse bg-surface-strong" />
-      ))}
-    </div>
-  );
-}
 
 export function HomeDashboard() {
   const currentMonthKey = useAppStore((state) => state.currentMonthKey);
   const openQuickEntry = useUiStore((state) => state.openQuickEntry);
-  const lastEntrySavedAt = useUiStore((state) => state.lastEntrySavedAt);
   const { snapshot, isLoading } = useDashboardData(currentMonthKey);
 
   return (
-    <>
-      <AppShell>
-        <section className="surface-card rounded-xl border border-primary/45 bg-primary/[0.06] p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1">
-                <p className="app-eyebrow">剁手辅助</p>
-                <InfoTip
-                  text={
-                    snapshot?.totalEntries
-                      ? "首页只保留预算、分类、奶茶和决策四组高频信息，打开就能知道今天该不该花。"
-                      : "当前还是空白月度，不会自动塞进演示数据。先记一笔，首页的统计和建议才会开始工作。"
-                  }
-                  label="查看首页说明"
-                />
-              </div>
-              <h1 className="text-[1.85rem] font-semibold leading-[1.15] tracking-tight text-balance">
-                {snapshot?.totalEntries ? "本月概览" : "开始记账"}
-              </h1>
-            </div>
-            <div className="min-w-24 rounded-lg border border-primary/20 bg-primary/12 px-3 py-2 text-right">
-              <p className="text-xs text-text-muted">当前月份</p>
-              <p className="mt-1 text-base font-semibold tabular-nums">
-                {getMonthLabel(getMonthDate(currentMonthKey))}
-              </p>
-              <p className="mt-3 text-xs text-text-muted">本月记录</p>
-              <p className="mt-1 text-sm font-medium tabular-nums">
-                {snapshot?.totalEntries ?? 0} 笔
-              </p>
-            </div>
-          </div>
-          <AnimatePresence>
-            {lastEntrySavedAt ? (
-              <motion.div
-                key={lastEntrySavedAt}
-                className="app-feedback mt-4 text-sm text-text-muted"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: [0, 1, 1, 0], y: [12, 0, 0, -8] }}
-                transition={{ duration: 4, times: [0, 0.12, 0.82, 1] }}
-              >
-                已经记下一笔，预算数字也跟着刷新了。
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </section>
+    <AppShell>
+      <header className="space-y-1">
+        <h1 className="text-xl font-semibold">首页</h1>
+        <p className="text-sm text-text-muted">{getMonthLabel(getMonthDate(currentMonthKey))}</p>
+      </header>
 
-        {isLoading || !snapshot ? (
-          <LoadingCards />
-        ) : (
-          <>
-            <MonthProgressCard snapshot={snapshot} />
-            <BudgetSummaryCard snapshot={snapshot} />
-            <CategorySplitCard snapshot={snapshot} />
-            <MilkTeaCard snapshot={snapshot} />
-            <DecisionGlanceCard snapshot={snapshot} />
-            <RecentEntriesCard snapshot={snapshot} onQuickEntry={() => openQuickEntry()} />
-          </>
-        )}
-      </AppShell>
-    </>
+      <section className="surface-card p-4">
+        <h2 className="mb-3 text-sm font-medium text-text-muted">当月收支概览</h2>
+        <div className="grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <p className="text-text-muted">支出</p>
+            <p className="mt-1 text-base font-semibold tabular-nums">
+              {isLoading || !snapshot ? "--" : formatCurrency(snapshot.monthSpent)}
+            </p>
+          </div>
+          <div>
+            <p className="text-text-muted">收入</p>
+            <p className="mt-1 text-base font-semibold tabular-nums">¥0.00</p>
+          </div>
+          <div>
+            <p className="text-text-muted">结余</p>
+            <p className="mt-1 text-base font-semibold tabular-nums">
+              {isLoading || !snapshot ? "--" : formatCurrency(snapshot.remainingBudget)}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="surface-card p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium">最近流水</h2>
+          <Link href="/ledger" className="text-sm text-primary">
+            查看全部
+          </Link>
+        </div>
+        <div className="space-y-2">
+          {!snapshot || snapshot.latestEntries.length === 0 ? (
+            <p className="text-sm text-text-muted">还没有流水，先记一笔。</p>
+          ) : (
+            snapshot.latestEntries.slice(0, 7).map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between border-b border-border-soft py-2 text-sm last:border-b-0"
+              >
+                <div>
+                  <p className="font-medium">
+                    {entry.emoji} {entry.category === "essential" ? "生活必需" : "娱乐"}
+                  </p>
+                  <p className="text-xs text-text-muted">{new Date(entry.createdAt).toLocaleString("zh-CN")}</p>
+                </div>
+                <p className="font-semibold tabular-nums">{formatCurrency(entry.amount)}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="surface-card p-4">
+        <h2 className="mb-3 text-sm font-medium">快捷入口</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="outline" onClick={() => openQuickEntry()}>
+            记一笔
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/decision">买不买判断</Link>
+          </Button>
+        </div>
+      </section>
+    </AppShell>
   );
 }
