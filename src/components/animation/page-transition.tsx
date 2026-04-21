@@ -16,7 +16,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
 
   return (
     <motion.main
-      className={cn("app-container flex flex-1 flex-col gap-4", className)}
+      className={cn("app-container flex flex-1 flex-col gap-3", className)}
       initial={motionProps.initial}
       animate={motionProps.animate}
       transition={motionProps.transition}

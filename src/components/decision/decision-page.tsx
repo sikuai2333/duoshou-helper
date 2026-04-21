@@ -1,21 +1,36 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AppShell } from "@/components/common/app-shell";
-import { Input } from "@/components/ui/input";
+import { CATEGORY_META } from "@/constants/app";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { formatCurrency } from "@/lib/currency";
 import { getDecisionSuggestion } from "@/lib/decision";
 import { useAppStore } from "@/stores/app-store";
 import type { CategoryType } from "@/types/domain";
+import { AppShell } from "@/components/common/app-shell";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+const toneClassName = {
+  buy: "border-essential text-essential",
+  wait: "border-secondary text-foreground",
+  skip: "border-danger text-danger",
+} as const;
+
+const toneCardClassName = {
+  buy: "bg-essential/[0.05]",
+  wait: "bg-secondary/[0.05]",
+  skip: "bg-danger/[0.05]",
+} as const;
 
 export function DecisionPageView() {
   const currentMonthKey = useAppStore((state) => state.currentMonthKey);
   const { snapshot, isLoading } = useDashboardData(currentMonthKey);
   const [amountDraft, setAmountDraft] = useState("");
   const [category, setCategory] = useState<CategoryType>("fun");
-  const [isEssential, setIsEssential] = useState(false);
-  const [note, setNote] = useState("");
 
   const amount = useMemo(() => {
     const nextAmount = Number.parseFloat(amountDraft);
@@ -25,7 +40,7 @@ export function DecisionPageView() {
   const suggestion = snapshot
     ? getDecisionSuggestion({
         amount,
-        category: isEssential ? "essential" : category,
+        category,
         remainingBudget: snapshot.remainingBudget,
         funSpent: snapshot.funSpent,
         essentialSpent: snapshot.essentialSpent,
@@ -35,100 +50,132 @@ export function DecisionPageView() {
 
   return (
     <AppShell>
-      <header className="space-y-1">
-        <h1 className="text-lg font-semibold">决策</h1>
-        <p className="text-sm text-text-muted">预算与剩余可花</p>
-      </header>
-
-      <section className="list-row p-4">
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-text-muted">当月预算</p>
-            <p className="mt-1 font-semibold tabular-nums">
-              {isLoading || !snapshot ? "--" : formatCurrency(snapshot.budget)}
-            </p>
-          </div>
-          <div>
-            <p className="text-text-muted">剩余可花</p>
-            <p className="mt-1 font-semibold tabular-nums">
-              {isLoading || !snapshot ? "--" : formatCurrency(snapshot.remainingBudget)}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="list-row space-y-3 p-4">
-        <h2 className="text-sm font-medium">买不买判断</h2>
-        <div className="space-y-1.5">
-          <label className="text-xs text-text-muted" htmlFor="decision-amount">
-            金额
-          </label>
-          <Input
-            id="decision-amount"
-            inputMode="decimal"
-            value={amountDraft}
-            onChange={(event) => setAmountDraft(event.target.value)}
-            placeholder="输入预计花费"
-            className="tabular-nums"
+      <section className="surface-card rounded-xl border border-secondary/45 bg-secondary/[0.06] p-4">
+        <div className="flex items-center gap-1">
+          <p className="app-eyebrow">剁手决策</p>
+          <InfoTip
+            text="金额可以不填，但填了以后建议会更贴近这个月的真实预算节奏。"
+            label="查看决策页说明"
           />
         </div>
-
-        <div className="space-y-1.5">
-          <p className="text-xs text-text-muted">分类</p>
-          <div className="grid grid-cols-2 gap-2">
-            {([
-              ["essential", "必要"],
-              ["fun", "可选"],
-            ] as const).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => {
-                  setCategory(value);
-                  setIsEssential(value === "essential");
-                }}
-                className={`h-9 rounded-md border text-sm ${
-                  category === value ? "border-foreground text-foreground" : "border-border-soft text-text-muted"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-xs text-text-muted" htmlFor="decision-note">
-            备注（可选）
-          </label>
-          <Input
-            id="decision-note"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="例如：替换旧耳机"
-          />
-        </div>
+        <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight">帮我决定</h1>
       </section>
 
-      <section className="list-row space-y-2 p-4">
-        <h2 className="text-sm font-medium">结果</h2>
-        <p className="text-sm">{isLoading || !suggestion ? "正在读取本地预算数据..." : suggestion.title}</p>
-        <p className="text-sm text-text-muted">
-          {isLoading || !suggestion ? "" : suggestion.description}
-        </p>
-        {snapshot && suggestion ? (
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-text-muted">可花余额</p>
-              <p className="font-semibold tabular-nums">{formatCurrency(snapshot.remainingBudget)}</p>
-            </div>
-            <div>
-              <p className="text-text-muted">剩余天数</p>
-              <p className="font-semibold tabular-nums">{snapshot.daysLeftInMonth} 天</p>
+      <Card className="border-fun/45 bg-fun/[0.05]">
+        <CardHeader className="pb-4">
+          <CardTitle>先补两项信息</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground" htmlFor="decision-amount">
+              想花多少钱
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-text-muted">
+                ¥
+              </span>
+              <Input
+                id="decision-amount"
+                inputMode="decimal"
+                placeholder="不填也可以，系统会按当前节奏先判断"
+                className="h-12 pl-9 text-lg font-semibold tabular-nums"
+                value={amountDraft}
+                onChange={(event) => setAmountDraft(event.target.value)}
+              />
             </div>
           </div>
-        ) : null}
-      </section>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">这笔更偏哪类</p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["essential", "fun"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                  className={cn(
+                    "rounded-md border px-4 py-3 text-left transition-colors",
+                    category === item
+                      ? item === "essential"
+                        ? "border-essential/35 bg-essential/[0.1] text-foreground"
+                        : "border-fun/35 bg-fun/[0.1] text-foreground"
+                      : "border-border-soft bg-surface text-text-muted",
+                  )}
+                >
+                  <p className="text-sm font-semibold">
+                    {CATEGORY_META[item].emoji} {CATEGORY_META[item].label}
+                  </p>
+                  <p className="mt-1 text-xs">
+                    {item === "essential" ? "更像生活刚需" : "更像情绪消费或娱乐"}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card
+        className={cn(
+          "border-l-4",
+          suggestion ? toneClassName[suggestion.tone] : "border-border-soft text-foreground",
+          suggestion ? toneCardClassName[suggestion.tone] : undefined,
+        )}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-1">
+            <CardTitle>
+              {isLoading || !suggestion ? "正在读取这个月的预算节奏..." : suggestion.title}
+            </CardTitle>
+            <InfoTip
+              text="建议会先看剩余额度占比，再看娱乐支出是否偏高，以及离月底还有多少天。"
+              label="查看决策逻辑说明"
+              maxWidth={320}
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm leading-6">
+            {isLoading || !suggestion
+              ? "先把本地数据加载出来，马上就能给建议。"
+              : suggestion.description}
+          </p>
+          {snapshot ? (
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="app-stat text-foreground">
+                <p className="text-text-muted">剩余额度</p>
+                <p className="mt-1 font-semibold tabular-nums">
+                  {formatCurrency(snapshot.remainingBudget)}
+                </p>
+              </div>
+              <div className="app-stat text-foreground">
+                <p className="text-text-muted">娱乐已花</p>
+                <p className="mt-1 font-semibold tabular-nums">{formatCurrency(snapshot.funSpent)}</p>
+              </div>
+              <div className="app-stat text-foreground">
+                <p className="text-text-muted">离月底</p>
+                <p className="mt-1 font-semibold tabular-nums">{snapshot.daysLeftInMonth} 天</p>
+              </div>
+            </div>
+          ) : null}
+          {suggestion ? (
+            <div className="space-y-2">
+              {suggestion.reasons.map((reason) => (
+                <div
+                  key={reason}
+                  className="border-b border-border-soft pb-2 text-sm text-foreground last:border-b-0 last:pb-0"
+                >
+                  {reason}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Button variant="ghost" onClick={() => setAmountDraft("")}>
+        清掉金额，回到默认判断
+      </Button>
     </AppShell>
   );
 }

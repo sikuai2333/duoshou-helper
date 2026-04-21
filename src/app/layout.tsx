@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { AppProviders } from "@/components/common/app-providers";
+import { FloatingActionMenu } from "@/components/navigation/floating-action-menu";
 import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
+
 
 export const metadata: Metadata = {
   title: {
@@ -22,11 +24,14 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>
           <div className="app-stage">
-            <div id="app-device-screen" className="app-device-screen">
-              <div className="app-scroll-region">{children}</div>
-              <div id="app-overlay-root" className="app-overlay-root" />
-              <QuickEntryDrawer />
-              <BottomNavigation />
+            <div className="app-device-shell">
+              <div id="app-device-screen" className="app-device-screen">
+                <div className="app-scroll-region">{children}</div>
+                <div id="app-overlay-root" className="app-overlay-root" />
+                <FloatingActionMenu />
+                <QuickEntryDrawer />
+                <BottomNavigation />
+              </div>
             </div>
           </div>
         </AppProviders>
