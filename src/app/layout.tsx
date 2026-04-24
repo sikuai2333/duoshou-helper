@@ -4,6 +4,7 @@ import { QuickEntryDrawer } from "@/components/ledger/quick-entry-drawer";
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
 import "./globals.css";
 
+
 export const metadata: Metadata = {
   title: {
     default: "剁手辅助",
